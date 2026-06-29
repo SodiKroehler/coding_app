@@ -16,14 +16,10 @@ import csv
 import os
 import sys
 import argparse
-import io
 
-from supabase import create_client, Client
+from _env import supabase_client
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+supabase = supabase_client()
 
 # Update this list when you add new label columns to the ratings table
 LABEL_COLUMNS = ["conspiracy_label", "polarity_label"]

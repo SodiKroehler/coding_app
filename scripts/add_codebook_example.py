@@ -10,16 +10,12 @@ Usage:
         --added-by "Smith & Jones (2022)"
 """
 
-import os
 import sys
 import argparse
 
-from supabase import create_client, Client
+from _env import supabase_client
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+supabase = supabase_client()
 
 
 def main(code: str, tweet_id: str | None, justification: str, added_by: str):

@@ -1,126 +1,187 @@
 #!/usr/bin/env python3
 """
-Upload tweets and create rater assignments.
+Upload Reddit posts from a coding round and assign them to raters.
 
 Usage:
-    python scripts/upload_tweets.py tweets.csv
+    python scripts/upload_tweets.py round_1
+    python scripts/upload_tweets.py round_1 --raters ARR159@pitt.edu sodikroehler@gmail.com
+    python scripts/upload_tweets.py round_1 --dry-run
 
-CSV format (headers required):
-    tweet_id, platform, content, author, posted_at, metadata_json, rater_email, round_name, round_description
+By default, tweets are assigned to ALL raters in the database.
+Use --raters to restrict to specific emails.
 
-- tweet_id: original platform post ID
-- platform: twitter | bluesky | reddit | youtube | tiktok
-- content: full post text
-- author: handle or username (no @)
-- posted_at: ISO 8601 datetime, e.g. 2024-03-15T10:30:00Z (optional, leave blank)
-- metadata_json: JSON string with extra fields like {"likes": 42} (optional, leave blank)
-- rater_email: email of the rater this tweet is assigned to
-- round_name: e.g. "round1" — created automatically if it doesn't exist
-- round_description: description of the round (only used on first creation of this round name)
+CSVs are read from:
+    LEFT_CONSPIRACY/local/coding_rounds/<round_name>/*.csv
 
-Duplicate tweets are safely ignored (ON CONFLICT DO NOTHING).
-Duplicate assignments are also safely ignored.
+Expected columns (Reddit export format):
+    id, author, created_utc, domain, num_comments, score,
+    selftext, subreddit, subreddit_id, title, url,
+    clean_text, clean_full, created_date, created_year
+    (plus index columns Unnamed: 0, Unnamed: 0.1 — ignored)
 """
 
 import csv
-import json
 import os
 import sys
-from datetime import datetime
+import glob
+import argparse
+from datetime import datetime, timezone
+from pathlib import Path
 
-from supabase import create_client, Client
+from _env import supabase_client
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+supabase = supabase_client()
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+# Path to coding_rounds folder relative to this script's location
+SCRIPT_DIR = Path(__file__).resolve().parent
+CODING_ROUNDS_DIR = SCRIPT_DIR.parent.parent.parent / "local" / "coding_rounds"
 
 
-def get_or_create_round(name: str, description: str) -> str:
+def utc_epoch_to_iso(value: str) -> str | None:
+    """Convert a Unix timestamp (seconds) to ISO 8601 UTC string."""
+    if not value or not value.strip():
+        return None
+    try:
+        ts = float(value.strip())
+        return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+    except (ValueError, OSError):
+        return None
+
+
+def get_or_create_round(name: str) -> str:
     res = supabase.table("rounds").select("id").eq("name", name).maybe_single().execute()
-    if res.data:
+    if res is not None and res.data:
+        print(f"  Round '{name}' already exists → {res.data['id']}")
         return res.data["id"]
-    res = supabase.table("rounds").insert({"name": name, "description": description or None}).execute()
-    return res.data[0]["id"]
+    res = supabase.table("rounds").insert({"name": name}).execute()
+    rid = res.data[0]["id"]
+    print(f"  Created round '{name}' → {rid}")
+    return rid
 
 
-def get_rater_id(email: str) -> str:
-    res = supabase.table("raters").select("id").eq("email", email.strip().lower()).single().execute()
-    if not res.data:
-        raise ValueError(f"Rater not found for email: {email}. Add them in Supabase first.")
-    return res.data["id"]
+def get_all_raters() -> list[dict]:
+    res = supabase.table("raters").select("id, name, email").execute()
+    return res.data or []
 
 
-def main(csv_path: str):
-    round_cache: dict[str, str] = {}
-    rater_cache: dict[str, str] = {}
+def get_raters_by_email(emails: list[str]) -> list[dict]:
+    raters = []
+    for email in emails:
+        res = supabase.table("raters").select("id, name, email").eq("email", email.strip().lower()).maybe_single().execute()
+        if not res.data:
+            print(f"  WARNING: No rater found for email '{email}' — skipping.", file=sys.stderr)
+        else:
+            raters.append(res.data)
+    return raters
 
-    tweets_to_upsert = []
-    assignments_to_insert = []
 
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            tweet_id = row["tweet_id"].strip()
-            platform = row["platform"].strip().lower()
-            content = row["content"].strip()
-            author = row.get("author", "").strip() or None
-            posted_at = row.get("posted_at", "").strip() or None
-            metadata_raw = row.get("metadata_json", "").strip()
-            metadata = json.loads(metadata_raw) if metadata_raw else None
-            rater_email = row["rater_email"].strip().lower()
-            round_name = row["round_name"].strip()
-            round_desc = row.get("round_description", "").strip() or None
+def parse_row(row: dict) -> dict | None:
+    """Map Reddit CSV columns to our tweets schema. Returns None to skip."""
+    tweet_id = row.get("id", "").strip()
+    if not tweet_id:
+        return None
 
-            if not tweet_id or not platform or not content:
-                print(f"Skipping row with missing required fields: {row}")
-                continue
+    # Content: prefer clean_full → clean_text → selftext
+    content = (
+        row.get("clean_full", "").strip()
+        or row.get("clean_text", "").strip()
+        or row.get("selftext", "").strip()
+    )
+    if not content:
+        return None
 
-            tweets_to_upsert.append({
-                "id": tweet_id,
-                "platform": platform,
-                "content": content,
-                "author": author,
-                "posted_at": posted_at,
-                "metadata": metadata,
-            })
+    posted_at = utc_epoch_to_iso(row.get("created_utc", ""))
 
-            # Resolve round
-            if round_name not in round_cache:
-                round_cache[round_name] = get_or_create_round(round_name, round_desc or "")
-                print(f"  Round '{round_name}' → {round_cache[round_name]}")
+    # Pack Reddit-specific fields into metadata
+    metadata: dict = {}
+    for key in ("subreddit", "subreddit_id", "num_comments", "score", "url", "title", "domain", "is_self", "created_year"):
+        val = row.get(key, "").strip()
+        if val:
+            metadata[key] = val
 
-            # Resolve rater
-            if rater_email not in rater_cache:
-                rater_cache[rater_email] = get_rater_id(rater_email)
-                print(f"  Rater '{rater_email}' → {rater_cache[rater_email]}")
+    return {
+        "id": tweet_id,
+        "platform": "reddit",
+        "content": content,
+        "author": row.get("author", "").strip() or None,
+        "posted_at": posted_at,
+        "metadata": metadata if metadata else None,
+    }
 
-            assignments_to_insert.append({
-                "tweet_id": tweet_id,
-                "rater_id": rater_cache[rater_email],
-                "round_id": round_cache[round_name],
-            })
 
-    # Batch upsert tweets (deduplicated by tweet_id)
-    unique_tweets = {t["id"]: t for t in tweets_to_upsert}.values()
-    if unique_tweets:
-        supabase.table("tweets").upsert(list(unique_tweets), on_conflict="id", ignore_duplicates=True).execute()
-        print(f"Upserted {len(list(unique_tweets))} unique tweet(s).")
+def main(round_name: str, rater_emails: list[str] | None, dry_run: bool):
+    round_dir = CODING_ROUNDS_DIR / round_name
+    if not round_dir.is_dir():
+        print(f"ERROR: Directory not found: {round_dir}", file=sys.stderr)
+        sys.exit(1)
 
-    # Insert assignments (ignore duplicates)
-    if assignments_to_insert:
-        supabase.table("assignments").upsert(
-            assignments_to_insert,
-            on_conflict="tweet_id,rater_id,round_id",
-            ignore_duplicates=True
-        ).execute()
-        print(f"Inserted {len(assignments_to_insert)} assignment(s).")
+    csv_files = glob.glob(str(round_dir / "*.csv"))
+    if not csv_files:
+        print(f"ERROR: No CSV files found in {round_dir}", file=sys.stderr)
+        sys.exit(1)
 
+    print(f"Reading from: {round_dir}")
+    print(f"CSV files: {[Path(f).name for f in csv_files]}")
+
+    # Collect all tweet rows across CSV files
+    tweets: dict[str, dict] = {}
+    for csv_path in csv_files:
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            skipped = 0
+            for row in reader:
+                parsed = parse_row(row)
+                if parsed is None:
+                    skipped += 1
+                    continue
+                tweets[parsed["id"]] = parsed  # deduplicate by id
+            if skipped:
+                print(f"  Skipped {skipped} row(s) with missing id or content in {Path(csv_path).name}")
+
+    print(f"\nUnique posts: {len(tweets)}")
+
+    # Resolve raters
+    raters = get_raters_by_email(rater_emails) if rater_emails else get_all_raters()
+    if not raters:
+        print("ERROR: No raters found. Add raters to Supabase first.", file=sys.stderr)
+        sys.exit(1)
+    print(f"Raters: {[r['name'] for r in raters]}")
+
+    if dry_run:
+        print(f"\nDry run — would upsert {len(tweets)} post(s) and create {len(tweets) * len(raters)} assignment(s).")
+        print("Sample post IDs:", list(tweets.keys())[:5])
+        return
+
+    # Resolve or create round
+    round_id = get_or_create_round(round_name)
+
+    # Upsert tweets
+    tweet_list = list(tweets.values())
+    supabase.table("tweets").upsert(tweet_list, on_conflict="id", ignore_duplicates=True).execute()
+    print(f"Upserted {len(tweet_list)} post(s).")
+
+    # Create assignments for every tweet × rater
+    assignments = [
+        {"tweet_id": tid, "rater_id": rater["id"], "round_id": round_id}
+        for tid in tweets
+        for rater in raters
+    ]
+    supabase.table("assignments").upsert(
+        assignments,
+        on_conflict="tweet_id,rater_id,round_id",
+        ignore_duplicates=True,
+    ).execute()
+    print(f"Created {len(assignments)} assignment(s) ({len(tweets)} posts × {len(raters)} raters).")
     print("Done.")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python scripts/upload_tweets.py <path/to/tweets.csv>")
-        sys.exit(1)
-    main(sys.argv[1])
+    parser = argparse.ArgumentParser(description="Upload a coding round to Supabase.")
+    parser.add_argument("round_name", help="Round folder name, e.g. round_1")
+    parser.add_argument(
+        "--raters", nargs="+", metavar="EMAIL",
+        help="Restrict to specific rater emails (default: all raters in DB)"
+    )
+    parser.add_argument("--dry-run", action="store_true", help="Preview without writing anything")
+    args = parser.parse_args()
+    main(args.round_name, args.raters, args.dry_run)
