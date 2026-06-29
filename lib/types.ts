@@ -4,6 +4,7 @@ export interface Round {
   description: string | null
   start_date: string | null
   end_date: string | null
+  is_active: boolean
   created_at: string
 }
 
