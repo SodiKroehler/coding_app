@@ -24,13 +24,16 @@ CREATE TABLE raters (
 
 -- Source posts
 CREATE TABLE tweets (
-  id         TEXT PRIMARY KEY,
-  platform   TEXT NOT NULL CHECK (platform IN ('twitter','bluesky','reddit','youtube','tiktok')),
-  content    TEXT NOT NULL,
-  author     TEXT,
-  posted_at  TIMESTAMPTZ,
-  metadata   JSONB,
-  added_at   TIMESTAMPTZ DEFAULT NOW()
+  id                      TEXT PRIMARY KEY,
+  platform                TEXT NOT NULL CHECK (platform IN ('twitter','bluesky','reddit','youtube','tiktok')),
+  content                 TEXT NOT NULL,
+  author                  TEXT,
+  posted_at               TIMESTAMPTZ,
+  political_leaning_qwen  TEXT,
+  conspiracy_qwen         TEXT,
+  explanation_qwen        TEXT,
+  metadata                JSONB,
+  added_at                TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Assignments: which rater should rate which tweet in which round

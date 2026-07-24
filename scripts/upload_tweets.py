@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 """
-Upload Reddit posts from a coding round and assign them to raters.
+Upload posts from a coding round and assign them to raters.
 
 Usage:
-    python scripts/upload_tweets.py round_1
-    python scripts/upload_tweets.py round_1 --raters ARR159@pitt.edu sodikroehler@gmail.com
-    python scripts/upload_tweets.py round_1 --dry-run
+    python scripts/upload_tweets.py round_2
+    python scripts/upload_tweets.py round_2 --raters ARR159@pitt.edu sodikroehler@gmail.com
+    python scripts/upload_tweets.py round_2 --dry-run
 
 By default, tweets are assigned to ALL raters in the database.
 Use --raters to restrict to specific emails.
 
 CSVs are read from:
-    LEFT_CONSPIRACY/local/coding_rounds/<round_name>/*.csv
+    scripts/<round_name>/*.csv
 
-Expected columns (Reddit export format):
-    id, author, created_utc, domain, num_comments, score,
-    selftext, subreddit, subreddit_id, title, url,
-    clean_text, clean_full, created_date, created_year
-    (plus index columns Unnamed: 0, Unnamed: 0.1 — ignored)
+Expected columns (export format):
+    sid, platform, source_id, source_url, author, created, text, title,
+    subreddit, domain, post_type, created_year,
+    political_leaning_qwen, conspiracy_qwen, explanation_qwen
+    (plus other analysis columns — ignored unless listed below)
 """
 
 import csv
-import os
 import sys
 import glob
 import argparse
@@ -34,17 +33,40 @@ supabase = supabase_client()
 
 # Path to coding_rounds folder relative to this script's location
 SCRIPT_DIR = Path(__file__).resolve().parent
-CODING_ROUNDS_DIR = SCRIPT_DIR.parent.parent.parent / "local" / "coding_rounds"
+# CODING_ROUNDS_DIR = SCRIPT_DIR.parent.parent.parent / "local" / "coding_rounds"
+
+CODING_ROUNDS_DIR = SCRIPT_DIR
+
+ALLOWED_PLATFORMS = {"twitter", "bluesky", "reddit", "youtube", "tiktok"}
+
+# Optional extras kept in tweets.metadata (not first-class columns)
+METADATA_KEYS = (
+    "subreddit",
+    "title",
+    "domain",
+    "source_url",
+    "post_type",
+    "created_year",
+)
 
 
-def utc_epoch_to_iso(value: str) -> str | None:
-    """Convert a Unix timestamp (seconds) to ISO 8601 UTC string."""
+def parse_posted_at(value: str) -> str | None:
+    """Parse a Unix timestamp or ISO-like datetime into ISO 8601 UTC."""
     if not value or not value.strip():
         return None
+    raw = value.strip()
     try:
-        ts = float(value.strip())
+        ts = float(raw)
         return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
-    except (ValueError, OSError):
+    except ValueError:
+        pass
+    # e.g. "2020-04-04 13:52:05+00:00"
+    try:
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).isoformat()
+    except ValueError:
         return None
 
 
@@ -67,7 +89,13 @@ def get_all_raters() -> list[dict]:
 def get_raters_by_email(emails: list[str]) -> list[dict]:
     raters = []
     for email in emails:
-        res = supabase.table("raters").select("id, name, email").eq("email", email.strip().lower()).maybe_single().execute()
+        res = (
+            supabase.table("raters")
+            .select("id, name, email")
+            .eq("email", email.strip().lower())
+            .maybe_single()
+            .execute()
+        )
         if not res.data:
             print(f"  WARNING: No rater found for email '{email}' — skipping.", file=sys.stderr)
         else:
@@ -76,35 +104,48 @@ def get_raters_by_email(emails: list[str]) -> list[dict]:
 
 
 def parse_row(row: dict) -> dict | None:
-    """Map Reddit CSV columns to our tweets schema. Returns None to skip."""
-    tweet_id = row.get("id", "").strip()
+    """Map CSV columns to our tweets schema. Returns None to skip."""
+    tweet_id = row.get("sid", "").strip() or row.get("id", "").strip()
     if not tweet_id:
         return None
 
-    # Content: prefer clean_full → clean_text → selftext
+    # Content: prefer text → title; fall back to older Reddit export columns
     content = (
-        row.get("clean_full", "").strip()
+        row.get("text", "").strip()
+        or row.get("title", "").strip()
+        or row.get("clean_full", "").strip()
         or row.get("clean_text", "").strip()
         or row.get("selftext", "").strip()
     )
     if not content:
         return None
 
-    posted_at = utc_epoch_to_iso(row.get("created_utc", ""))
+    platform = (row.get("platform", "") or "reddit").strip().lower()
+    if platform not in ALLOWED_PLATFORMS:
+        print(f"  WARNING: Unknown platform '{platform}' for {tweet_id} — defaulting to reddit.", file=sys.stderr)
+        platform = "reddit"
 
-    # Pack Reddit-specific fields into metadata
+    posted_at = parse_posted_at(row.get("created", "") or row.get("created_utc", ""))
+
     metadata: dict = {}
-    for key in ("subreddit", "subreddit_id", "num_comments", "score", "url", "title", "domain", "is_self", "created_year"):
+    for key in METADATA_KEYS:
         val = row.get(key, "").strip()
         if val:
             metadata[key] = val
 
+    def opt(col: str) -> str | None:
+        val = row.get(col, "").strip()
+        return val or None
+
     return {
         "id": tweet_id,
-        "platform": "reddit",
+        "platform": platform,
         "content": content,
         "author": row.get("author", "").strip() or None,
         "posted_at": posted_at,
+        "political_leaning_qwen": opt("political_leaning_qwen"),
+        "conspiracy_qwen": opt("conspiracy_qwen"),
+        "explanation_qwen": opt("explanation_qwen"),
         "metadata": metadata if metadata else None,
     }
 
@@ -150,6 +191,12 @@ def main(round_name: str, rater_emails: list[str] | None, dry_run: bool):
     if dry_run:
         print(f"\nDry run — would upsert {len(tweets)} post(s) and create {len(tweets) * len(raters)} assignment(s).")
         print("Sample post IDs:", list(tweets.keys())[:5])
+        sample = next(iter(tweets.values()))
+        print("Sample Qwen:", {
+            "political_leaning_qwen": sample.get("political_leaning_qwen"),
+            "conspiracy_qwen": sample.get("conspiracy_qwen"),
+            "explanation_qwen": (sample.get("explanation_qwen") or "")[:80],
+        })
         return
 
     # Resolve or create round
@@ -177,10 +224,10 @@ def main(round_name: str, rater_emails: list[str] | None, dry_run: bool):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Upload a coding round to Supabase.")
-    parser.add_argument("round_name", help="Round folder name, e.g. round_1")
+    parser.add_argument("round_name", help="Round folder name, e.g. round_2")
     parser.add_argument(
         "--raters", nargs="+", metavar="EMAIL",
-        help="Restrict to specific rater emails (default: all raters in DB)"
+        help="Restrict to specific rater emails (default: all raters in DB)",
     )
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing anything")
     args = parser.parse_args()

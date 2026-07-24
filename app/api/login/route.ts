@@ -8,11 +8,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Email and PIN required' }, { status: 400 })
   }
 
+  // Always match on lowercase — store rater emails lowercase in the DB
+  const normalizedEmail = String(email).trim().toLowerCase()
+
   const supabase = createServerClient()
   const { data: rater, error } = await supabase
     .from('raters')
     .select('id, name, email, pin')
-    .eq('email', email.trim().toLowerCase())
+    .eq('email', normalizedEmail)
     .single()
 
   if (error || !rater) {

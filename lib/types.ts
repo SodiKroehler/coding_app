@@ -21,6 +21,9 @@ export interface Tweet {
   content: string
   author: string | null
   posted_at: string | null
+  political_leaning_qwen: string | null
+  conspiracy_qwen: string | null
+  explanation_qwen: string | null
   metadata: Record<string, unknown> | null
   added_at: string
 }
