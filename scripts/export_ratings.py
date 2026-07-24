@@ -36,6 +36,7 @@ FIELDNAMES = [
     "round_name",
     "round_description",
     *LABEL_COLUMNS,
+    "note",
     "rated_at",
 ]
 
@@ -46,7 +47,7 @@ def main(round_name: str | None, out_path: str | None):
     query = (
         supabase.table("ratings")
         .select(
-            f"id, tweet_id, rater_id, round_id, {label_select}, created_at, "
+            f"id, tweet_id, rater_id, round_id, {label_select}, note, created_at, "
             "tweets(id, platform, content, author, posted_at), "
             "raters(id, name, email), "
             "rounds(id, name, description)"
@@ -88,6 +89,7 @@ def main(round_name: str | None, out_path: str | None):
         }
         for col in LABEL_COLUMNS:
             row[col] = r.get(col, "")
+        row["note"] = r.get("note") or ""
         writer.writerow(row)
 
     if out_path:

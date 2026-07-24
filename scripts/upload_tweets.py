@@ -16,7 +16,8 @@ CSVs are read from:
 Expected columns (export format):
     sid, platform, source_id, source_url, author, created, text, title,
     subreddit, domain, post_type, created_year,
-    political_leaning_qwen, conspiracy_qwen, explanation_qwen
+    political_leaning_qwen, conspiracy_qwen, explanation_qwen,
+    prob_no_conspiracy, prob_conspiracy, political_leaning_label
     (plus other analysis columns — ignored unless listed below)
 """
 
@@ -66,6 +67,15 @@ def parse_posted_at(value: str) -> str | None:
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc).isoformat()
+    except ValueError:
+        return None
+
+
+def parse_float(value: str) -> float | None:
+    if not value or not str(value).strip():
+        return None
+    try:
+        return float(str(value).strip())
     except ValueError:
         return None
 
@@ -146,6 +156,9 @@ def parse_row(row: dict) -> dict | None:
         "political_leaning_qwen": opt("political_leaning_qwen"),
         "conspiracy_qwen": opt("conspiracy_qwen"),
         "explanation_qwen": opt("explanation_qwen"),
+        "prob_no_conspiracy": parse_float(row.get("prob_no_conspiracy", "")),
+        "prob_conspiracy": parse_float(row.get("prob_conspiracy", "")),
+        "political_leaning_label": opt("political_leaning_label"),
         "metadata": metadata if metadata else None,
     }
 
@@ -192,9 +205,12 @@ def main(round_name: str, rater_emails: list[str] | None, dry_run: bool):
         print(f"\nDry run — would upsert {len(tweets)} post(s) and create {len(tweets) * len(raters)} assignment(s).")
         print("Sample post IDs:", list(tweets.keys())[:5])
         sample = next(iter(tweets.values()))
-        print("Sample Qwen:", {
+        print("Sample classifiers:", {
             "political_leaning_qwen": sample.get("political_leaning_qwen"),
             "conspiracy_qwen": sample.get("conspiracy_qwen"),
+            "prob_no_conspiracy": sample.get("prob_no_conspiracy"),
+            "prob_conspiracy": sample.get("prob_conspiracy"),
+            "political_leaning_label": sample.get("political_leaning_label"),
             "explanation_qwen": (sample.get("explanation_qwen") or "")[:80],
         })
         return

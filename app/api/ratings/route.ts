@@ -4,11 +4,12 @@ import { LABEL_COLUMNS } from '@/lib/dimensions'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { tweet_id, rater_id, round_id, labels } = body as {
+  const { tweet_id, rater_id, round_id, labels, note } = body as {
     tweet_id: string
     rater_id: string
     round_id: string
     labels: Record<string, string>
+    note?: string | null
   }
 
   if (!tweet_id || !rater_id || !round_id || !labels) {
@@ -26,11 +27,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const trimmedNote =
+    typeof note === 'string' && note.trim() ? note.trim() : null
+
   const { error } = await supabase.from('ratings').insert({
     id,
     tweet_id,
     rater_id,
     round_id,
+    note: trimmedNote,
     ...labelData,
   })
 

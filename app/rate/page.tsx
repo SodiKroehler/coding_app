@@ -17,6 +17,7 @@ export default function RatePage() {
   const [round, setRound] = useState<Round | null | 'loading'>('loading')
   const [tweet, setTweet] = useState<Tweet | null>(null)
   const [labels, setLabels] = useState<Record<string, string>>({})
+  const [note, setNote] = useState('')
   const [progress, setProgress] = useState({ rated: 0, total: 0 })
   const [tweetLoading, setTweetLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -42,6 +43,7 @@ export default function RatePage() {
         setTweet(nextData.tweet)
         setDone(false)
         setLabels({})
+        setNote('')
       }
     } finally {
       setTweetLoading(false)
@@ -83,6 +85,7 @@ export default function RatePage() {
           rater_id: session.id,
           round_id: round.id,
           labels,
+          note: note.trim() || null,
         }),
       })
       if (!res.ok && res.status !== 409) {
@@ -142,6 +145,8 @@ export default function RatePage() {
               <RatingControls
                 values={labels}
                 onChange={(col, val) => setLabels(prev => ({ ...prev, [col]: val }))}
+                note={note}
+                onNoteChange={setNote}
               />
               {error && <p className="text-sm text-red-600">{error}</p>}
               <button

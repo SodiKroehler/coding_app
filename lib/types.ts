@@ -24,6 +24,9 @@ export interface Tweet {
   political_leaning_qwen: string | null
   conspiracy_qwen: string | null
   explanation_qwen: string | null
+  prob_no_conspiracy: number | null
+  prob_conspiracy: number | null
+  political_leaning_label: string | null
   metadata: Record<string, unknown> | null
   added_at: string
 }
@@ -43,6 +46,7 @@ export interface Rating {
   round_id: string
   conspiracy_label: string | null
   polarity_label: string | null
+  note: string | null
   created_at: string
 }
 

@@ -32,6 +32,9 @@ CREATE TABLE tweets (
   political_leaning_qwen  TEXT,
   conspiracy_qwen         TEXT,
   explanation_qwen        TEXT,
+  prob_no_conspiracy      DOUBLE PRECISION,
+  prob_conspiracy         DOUBLE PRECISION,
+  political_leaning_label TEXT,
   metadata                JSONB,
   added_at                TIMESTAMPTZ DEFAULT NOW()
 );
@@ -55,6 +58,7 @@ CREATE TABLE ratings (
   round_id          UUID NOT NULL REFERENCES rounds(id),
   conspiracy_label  TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear')),
   polarity_label    TEXT CHECK (polarity_label IN ('left','center','right','unclear')),
+  note              TEXT,
   created_at        TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE (tweet_id, rater_id, round_id)
 );
