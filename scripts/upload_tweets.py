@@ -218,9 +218,9 @@ def main(round_name: str, rater_emails: list[str] | None, dry_run: bool):
     # Resolve or create round
     round_id = get_or_create_round(round_name)
 
-    # Upsert tweets
+    # Upsert tweets — update on conflict so re-runs fill/refresh classifier columns
     tweet_list = list(tweets.values())
-    supabase.table("tweets").upsert(tweet_list, on_conflict="id", ignore_duplicates=True).execute()
+    supabase.table("tweets").upsert(tweet_list, on_conflict="id").execute()
     print(f"Upserted {len(tweet_list)} post(s).")
 
     # Create assignments for every tweet × rater

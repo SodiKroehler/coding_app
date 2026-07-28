@@ -46,6 +46,12 @@ export interface Rating {
   round_id: string
   conspiracy_label: string | null
   polarity_label: string | null
+  stance: string
+  actor: string | null
+  action: string | null
+  target: string | null
+  known_conspiracy: string | null
+  known_conspiracy_other: string | null
   note: string | null
   created_at: string
 }

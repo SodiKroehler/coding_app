@@ -13,7 +13,6 @@ Add new label columns to LABEL_COLUMNS as dimensions grow.
 """
 
 import csv
-import os
 import sys
 import argparse
 
@@ -23,6 +22,16 @@ supabase = supabase_client()
 
 # Update this list when you add new label columns to the ratings table
 LABEL_COLUMNS = ["conspiracy_label", "polarity_label"]
+
+EXTRA_COLUMNS = [
+    "stance",
+    "actor",
+    "action",
+    "target",
+    "known_conspiracy",
+    "known_conspiracy_other",
+    "note",
+]
 
 FIELDNAMES = [
     "rating_id",
@@ -36,7 +45,7 @@ FIELDNAMES = [
     "round_name",
     "round_description",
     *LABEL_COLUMNS,
-    "note",
+    *EXTRA_COLUMNS,
     "rated_at",
 ]
 
@@ -44,10 +53,11 @@ FIELDNAMES = [
 def main(round_name: str | None, out_path: str | None):
     # Fetch all ratings, joined with tweets, raters, rounds
     label_select = ", ".join(f"ratings.{col}" for col in LABEL_COLUMNS)
+    extra_select = ", ".join(f"ratings.{col}" for col in EXTRA_COLUMNS)
     query = (
         supabase.table("ratings")
         .select(
-            f"id, tweet_id, rater_id, round_id, {label_select}, note, created_at, "
+            f"id, tweet_id, rater_id, round_id, {label_select}, {extra_select}, created_at, "
             "tweets(id, platform, content, author, posted_at), "
             "raters(id, name, email), "
             "rounds(id, name, description)"
@@ -89,7 +99,8 @@ def main(round_name: str | None, out_path: str | None):
         }
         for col in LABEL_COLUMNS:
             row[col] = r.get(col, "")
-        row["note"] = r.get("note") or ""
+        for col in EXTRA_COLUMNS:
+            row[col] = r.get(col) or ""
         writer.writerow(row)
 
     if out_path:

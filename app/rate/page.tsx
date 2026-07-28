@@ -4,10 +4,27 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { DIMENSIONS } from '@/lib/dimensions'
+import {
+  DEFAULT_STANCE,
+  KNOWN_CONSPIRACY_OTHER,
+  TEMPLATE_MAX_WORDS,
+  wordCount,
+} from '@/lib/knownConspiracies'
 import type { Tweet, Round } from '@/lib/types'
 import PostCard from '@/components/PostCard'
-import RatingControls from '@/components/RatingControls'
+import RatingControls, { type RatingExtras } from '@/components/RatingControls'
 import ProgressBar from '@/components/ProgressBar'
+
+function emptyExtras(): RatingExtras {
+  return {
+    stance: DEFAULT_STANCE,
+    actor: '',
+    action: '',
+    target: '',
+    knownConspiracy: '',
+    knownConspiracyOther: '',
+  }
+}
 
 export default function RatePage() {
   const router = useRouter()
@@ -18,11 +35,18 @@ export default function RatePage() {
   const [tweet, setTweet] = useState<Tweet | null>(null)
   const [labels, setLabels] = useState<Record<string, string>>({})
   const [note, setNote] = useState('')
+  const [extras, setExtras] = useState<RatingExtras>(emptyExtras)
   const [progress, setProgress] = useState({ rated: 0, total: 0 })
   const [tweetLoading, setTweetLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function resetForm() {
+    setLabels({})
+    setNote('')
+    setExtras(emptyExtras())
+  }
 
   // Fetch next tweet + progress for a given round
   const fetchNext = useCallback(async (r: Round) => {
@@ -42,8 +66,7 @@ export default function RatePage() {
       } else {
         setTweet(nextData.tweet)
         setDone(false)
-        setLabels({})
-        setNote('')
+        resetForm()
       }
     } finally {
       setTweetLoading(false)
@@ -74,6 +97,30 @@ export default function RatePage() {
       return
     }
 
+    if (!extras.stance) {
+      setError('Please select a stance')
+      return
+    }
+
+    for (const [field, value] of [
+      ['actor', extras.actor],
+      ['action', extras.action],
+      ['target', extras.target],
+    ] as const) {
+      if (wordCount(value) > TEMPLATE_MAX_WORDS) {
+        setError(`${field} must be at most ${TEMPLATE_MAX_WORDS} words`)
+        return
+      }
+    }
+
+    if (
+      extras.knownConspiracy === KNOWN_CONSPIRACY_OTHER &&
+      !extras.knownConspiracyOther.trim()
+    ) {
+      setError('Please describe the other conspiracy theory, or clear Known conspiracy')
+      return
+    }
+
     setSubmitting(true)
     setError(null)
     try {
@@ -86,6 +133,15 @@ export default function RatePage() {
           round_id: round.id,
           labels,
           note: note.trim() || null,
+          stance: extras.stance,
+          actor: extras.actor.trim() || null,
+          action: extras.action.trim() || null,
+          target: extras.target.trim() || null,
+          known_conspiracy: extras.knownConspiracy || null,
+          known_conspiracy_other:
+            extras.knownConspiracy === KNOWN_CONSPIRACY_OTHER
+              ? extras.knownConspiracyOther.trim() || null
+              : null,
         }),
       })
       if (!res.ok && res.status !== 409) {
@@ -147,6 +203,8 @@ export default function RatePage() {
                 onChange={(col, val) => setLabels(prev => ({ ...prev, [col]: val }))}
                 note={note}
                 onNoteChange={setNote}
+                extras={extras}
+                onExtrasChange={(patch) => setExtras(prev => ({ ...prev, ...patch }))}
               />
               {error && <p className="text-sm text-red-600">{error}</p>}
               <button

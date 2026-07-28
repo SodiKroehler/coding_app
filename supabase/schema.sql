@@ -52,16 +52,42 @@ CREATE TABLE assignments (
 -- Ratings: append-only, never updated
 -- Flat label columns — add new ones with ALTER TABLE ADD COLUMN as dimensions grow
 CREATE TABLE ratings (
-  id                TEXT PRIMARY KEY,  -- {tweet_id}__{rater_id}__{round_id}
-  tweet_id          TEXT NOT NULL REFERENCES tweets(id),
-  rater_id          UUID NOT NULL REFERENCES raters(id),
-  round_id          UUID NOT NULL REFERENCES rounds(id),
-  conspiracy_label  TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear')),
-  polarity_label    TEXT CHECK (polarity_label IN ('left','center','right','unclear')),
-  note              TEXT,
-  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  id                      TEXT PRIMARY KEY,  -- {tweet_id}__{rater_id}__{round_id}
+  tweet_id                TEXT NOT NULL REFERENCES tweets(id),
+  rater_id                UUID NOT NULL REFERENCES raters(id),
+  round_id                UUID NOT NULL REFERENCES rounds(id),
+  conspiracy_label        TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear')),
+  polarity_label          TEXT CHECK (polarity_label IN ('left','center','right','unclear')),
+  stance                  TEXT NOT NULL DEFAULT 'NEUTRAL',
+  actor                   TEXT,
+  action                  TEXT,
+  target                  TEXT,
+  known_conspiracy        TEXT,
+  known_conspiracy_other  TEXT,
+  note                    TEXT,
+  created_at              TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE (tweet_id, rater_id, round_id)
 );
+
+-- Known conspiracy dropdown options are static in the app
+-- (lib/knownConspiracies.ts), not a DB table. Reference list:
+--   Iran/Israel attack false flag for Epstein
+--   Trump assassination attempt was staged
+--   Trump Epstein child abuse (BlueAnon)
+--   2024 election stolen from Harris
+--   LA wildfires as gov/Israel inside job
+--   Biden drugged before 2024 debate
+--   JD Vance couch memoir claim
+--   DC/Boulder attacks as false flags
+--   Sascha Riley Trump abuse claims
+--   Raisi crash as CIA/Mossad hit
+--   Trump suppressing Epstein files
+--   FBI Iran warning as war pretext
+--   Vance and the Pope
+--   Virginia Giuffre suicide narrative
+--   Epstein eating children claims
+-- Ratings may also store known_conspiracy = 'other' with free text in
+-- known_conspiracy_other.
 
 -- Codebook examples
 CREATE TABLE codebook_examples (
