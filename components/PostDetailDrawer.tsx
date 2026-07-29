@@ -22,6 +22,27 @@ export default function PostDetailDrawer({ row, onClose }: Props) {
 
   const { tweet, raterLabels } = row
   const metadata = tweet.metadata ?? {}
+  const title = metadata.title != null && String(metadata.title).trim()
+    ? String(metadata.title).trim()
+    : null
+  const sourceUrl = metadata.source_url != null && String(metadata.source_url).trim()
+    ? String(metadata.source_url).trim()
+    : null
+  const body = (tweet.content ?? '').trim()
+  const titleEqualsBody = Boolean(title && body && title === body)
+  const showTitleBlock = Boolean(title && !titleEqualsBody)
+  const textToShow = (() => {
+    if (!body && title) return title
+    if (!body) return null
+    if (title && body.startsWith(title) && body.length > title.length) {
+      return body.slice(title.length).replace(/^\s*\n+/, '').trim() || body
+    }
+    return body
+  })()
+
+  const otherMeta = Object.entries(metadata).filter(
+    ([k]) => k !== 'title' && k !== 'source_url'
+  )
 
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
@@ -42,15 +63,43 @@ export default function PostDetailDrawer({ row, onClose }: Props) {
         </div>
 
         <div className="p-6 flex flex-col gap-6">
-          <div className="text-gray-900 text-base leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border">
-            {tweet.content}
+          {showTitleBlock && (
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Title</p>
+              <h2 className="text-lg font-semibold text-gray-900 leading-snug">{title}</h2>
+            </div>
+          )}
+
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Text</p>
+            {textToShow ? (
+              <div className="text-gray-900 text-base leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border">
+                {textToShow}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 italic">No text content.</p>
+            )}
           </div>
 
-          {Object.keys(metadata).length > 0 && (
+          {sourceUrl && (
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Source</p>
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-indigo-600 hover:underline break-all"
+              >
+                {sourceUrl}
+              </a>
+            </div>
+          )}
+
+          {otherMeta.length > 0 && (
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Metadata</p>
               <div className="flex flex-wrap gap-3 text-xs text-gray-600">
-                {Object.entries(metadata).map(([k, v]) => (
+                {otherMeta.map(([k, v]) => (
                   <span key={k}><span className="font-medium">{k}:</span> {String(v)}</span>
                 ))}
               </div>

@@ -122,7 +122,13 @@ export default function ExplorerPage() {
                     <td className="px-4 py-3">
                       <PlatformBadge platform={row.tweet.platform} />
                     </td>
-                    <td className="px-4 py-3 max-w-xs text-gray-700">{truncate(row.tweet.content)}</td>
+                    <td className="px-4 py-3 max-w-md text-gray-700">
+                      {truncate(
+                        row.tweet.content?.trim()
+                        || (row.tweet.metadata?.title != null ? String(row.tweet.metadata.title) : '')
+                        || '—'
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-gray-500">{row.tweet.author ?? '—'}</td>
                     <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(row.tweet.posted_at)}</td>
                     {allRaterNames.map(name => {
