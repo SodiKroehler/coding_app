@@ -1,7 +1,7 @@
 'use client'
 
 import type { ExplorerRow } from '@/lib/types'
-import { DIMENSIONS } from '@/lib/dimensions'
+import { DIMENSIONS, labelForValue } from '@/lib/dimensions'
 import PlatformBadge from './PlatformBadge'
 
 interface Props {
@@ -124,8 +124,20 @@ export default function PostDetailDrawer({ row, onClose }: Props) {
                   {raterLabels.map((rl) => (
                     <tr key={rl.rater_id} className="border-b last:border-0">
                       <td className="py-2 pr-4 font-semibold text-gray-700">{rl.rater_name}</td>
-                      <td className="py-2 pr-4">{rl.conspiracy_label ?? <span className="text-gray-300">—</span>}</td>
-                      <td className="py-2 pr-4">{rl.polarity_label ?? <span className="text-gray-300">—</span>}</td>
+                      <td className="py-2 pr-4">
+                        {rl.conspiracy_label ? (
+                          labelForValue('conspiracy_label', rl.conspiracy_label)
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="py-2 pr-4">
+                        {rl.polarity_label ? (
+                          labelForValue('polarity_label', rl.polarity_label)
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

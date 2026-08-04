@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { DIMENSIONS } from '@/lib/dimensions'
+import { PEW_TYPOLOGY_EXTENDED, PEW_TYPOLOGY_SOURCE } from '@/lib/pewTypology'
 import type { CodebookExample } from '@/lib/types'
 import PlatformBadge from '@/components/PlatformBadge'
 
@@ -46,18 +47,95 @@ export default function CodesPage() {
             {DIMENSIONS.map(dim => (
               <div key={dim.id} className="bg-white rounded-xl border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{dim.label}</h3>
-                <p className="text-gray-600 text-sm mb-4">{dim.description}</p>
-                <div className="flex flex-col gap-2">
+                <p className="text-gray-600 text-sm mb-3">{dim.infoIntro}</p>
+                {dim.infoLink && (
+                  <p className="text-sm mb-3">
+                    <a
+                      href={dim.infoLink.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 hover:underline"
+                    >
+                      {dim.infoLink.label}
+                    </a>
+                  </p>
+                )}
+                {dim.infoQuote && (
+                  <blockquote className="text-sm text-gray-800 leading-relaxed border-l-2 border-indigo-300 pl-3 mb-4 italic">
+                    “{dim.infoQuote}”
+                  </blockquote>
+                )}
+                <div className="flex flex-col gap-3">
                   {dim.options.map(opt => (
                     <div key={opt.value} className="flex items-start gap-3">
                       <span className="inline-block bg-indigo-100 text-indigo-700 rounded px-2 py-0.5 text-xs font-mono font-bold mt-0.5 shrink-0">
                         {opt.value}
                       </span>
-                      <span className="text-sm text-gray-700">{opt.label}</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-800">{opt.label}</p>
+                        <p className="text-sm text-gray-600">{opt.description}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Extended definitions — Pew typology */}
+        <section>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Extended definitions</h2>
+          <p className="text-sm text-gray-600 mb-1">
+            Detailed coder guidance for Political Lean, drawn from Pew&apos;s political typology.
+            Use these when choosing among groups that look similar at a glance.
+          </p>
+          <p className="text-xs text-gray-500 mb-6">
+            Source:{' '}
+            <a
+              href={PEW_TYPOLOGY_SOURCE.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:underline"
+            >
+              {PEW_TYPOLOGY_SOURCE.label}
+            </a>
+            {' '}({PEW_TYPOLOGY_SOURCE.citation}). All group profiles and figures below are from Pew.
+          </p>
+          <div className="flex flex-col gap-6">
+            {PEW_TYPOLOGY_EXTENDED.map((group) => (
+              <article
+                key={group.value}
+                className="bg-white rounded-xl border border-gray-200 p-6"
+              >
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {group.title}{' '}
+                  <span className="font-normal text-gray-500">— {group.share}</span>
+                </h3>
+                <p className="text-sm text-gray-700 mt-2 leading-relaxed">{group.summary}</p>
+                <ul className="mt-4 flex flex-col gap-3 text-sm text-gray-700 leading-relaxed">
+                  <li>
+                    <span className="font-semibold text-gray-900">Values:</span> {group.values}
+                  </li>
+                  <li>
+                    <span className="font-semibold text-gray-900">Rejects:</span> {group.rejects}
+                  </li>
+                  <li>
+                    <span className="font-semibold text-gray-900">Tell:</span> {group.tell}
+                  </li>
+                </ul>
+                <p className="text-xs text-gray-400 mt-4">
+                  Source:{' '}
+                  <a
+                    href={PEW_TYPOLOGY_SOURCE.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 hover:underline"
+                  >
+                    {PEW_TYPOLOGY_SOURCE.citation}
+                  </a>
+                </p>
+              </article>
             ))}
           </div>
         </section>

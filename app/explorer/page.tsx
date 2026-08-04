@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { ExplorerRow, Round } from '@/lib/types'
-import { DIMENSIONS } from '@/lib/dimensions'
+import { DIMENSIONS, labelForValue } from '@/lib/dimensions'
 import PlatformBadge from '@/components/PlatformBadge'
 import PostDetailDrawer from '@/components/PostDetailDrawer'
 
@@ -141,7 +141,7 @@ export default function ExplorerPage() {
                                 const val = d.dbColumn === 'conspiracy_label' ? rl.conspiracy_label : rl.polarity_label
                                 return val ? (
                                   <span key={d.id} className="inline-block bg-indigo-100 text-indigo-700 rounded px-1.5 py-0.5 text-xs font-medium">
-                                    {val}
+                                    {labelForValue(d.dbColumn, val)}
                                   </span>
                                 ) : null
                               })}
