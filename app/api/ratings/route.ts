@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { LABEL_COLUMNS } from '@/lib/dimensions'
-import { STANCE_OPTIONS, type Stance } from '@/lib/knownConspiracies'
+import { STANCE_OPTIONS, type ActorPoliticalLeaning, type Stance } from '@/lib/knownConspiracies'
+
+const ACTOR_LEAN_VALUES: ActorPoliticalLeaning[] = ['left', 'right', 'center', 'unclear']
 
 function optText(value: unknown): string | null {
   if (typeof value !== 'string') return null
@@ -19,6 +21,7 @@ export async function POST(req: NextRequest) {
     note,
     stance,
     actor,
+    actor_political_leaning,
     action,
     target,
     known_conspiracy,
@@ -31,6 +34,7 @@ export async function POST(req: NextRequest) {
     note?: string | null
     stance?: string
     actor?: string | null
+    actor_political_leaning?: string | null
     action?: string | null
     target?: string | null
     known_conspiracy?: string | null
@@ -44,6 +48,11 @@ export async function POST(req: NextRequest) {
   const resolvedStance = (stance ?? 'NEUTRAL') as Stance
   if (!STANCE_OPTIONS.includes(resolvedStance)) {
     return NextResponse.json({ error: 'Invalid stance' }, { status: 400 })
+  }
+
+  const actorLean = optText(actor_political_leaning)
+  if (actorLean && !ACTOR_LEAN_VALUES.includes(actorLean as ActorPoliticalLeaning)) {
+    return NextResponse.json({ error: 'Invalid actor_political_leaning' }, { status: 400 })
   }
 
   const id = `${tweet_id}__${rater_id}__${round_id}`
@@ -64,6 +73,7 @@ export async function POST(req: NextRequest) {
     round_id,
     stance: resolvedStance,
     actor: optText(actor),
+    actor_political_leaning: actorLean,
     action: optText(action),
     target: optText(target),
     known_conspiracy: optText(known_conspiracy),

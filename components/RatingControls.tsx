@@ -5,15 +5,18 @@ import DimensionInfo from '@/components/DimensionInfo'
 import KnownConspiracySelect from '@/components/KnownConspiracySelect'
 import {
   KNOWN_CONSPIRACY_OTHER,
+  ACTOR_POLITICAL_LEANING_OPTIONS,
   STANCE_OPTIONS,
   TEMPLATE_MAX_WORDS,
   wordCount,
+  type ActorPoliticalLeaning,
   type Stance,
 } from '@/lib/knownConspiracies'
 
 export interface RatingExtras {
   stance: Stance
   actor: string
+  actorPoliticalLeaning: ActorPoliticalLeaning | ''
   action: string
   target: string
   knownConspiracy: string
@@ -145,11 +148,36 @@ export default function RatingControls({
           Fill any slots that apply — e.g. who is conspiring, what they&apos;re doing, toward what goal.
         </p>
         <div className="flex flex-col gap-2">
-          <TemplateField
-            value={extras.actor}
-            onChange={(actor) => onExtrasChange({ actor })}
-            placeholder="actor"
-          />
+          <div className="flex gap-2 items-start">
+            <div className="flex-1 min-w-0">
+              <TemplateField
+                value={extras.actor}
+                onChange={(actor) => onExtrasChange({ actor })}
+                placeholder="actor"
+              />
+            </div>
+            <div className="w-[9.5rem] shrink-0">
+              <label className="block text-[10px] font-medium text-gray-500 mb-1 leading-tight">
+                Actor political leaning
+              </label>
+              <select
+                value={extras.actorPoliticalLeaning}
+                onChange={(e) =>
+                  onExtrasChange({
+                    actorPoliticalLeaning: e.target.value as ActorPoliticalLeaning | '',
+                  })
+                }
+                className={selectClass}
+              >
+                <option value="">—</option>
+                {ACTOR_POLITICAL_LEANING_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.short} — {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <p className="text-sm text-gray-600 px-1">conspiring</p>
           <TemplateField
             value={extras.action}
@@ -171,7 +199,7 @@ export default function RatingControls({
           <span className="font-normal text-gray-400">(optional)</span>
         </p>
         <p className="text-xs text-gray-500 mb-2">
-          Highlight = ideology lean from the forest plot:{' '}
+          Highlight = ideology lean {' '}
           <span className="inline-block px-1.5 rounded bg-blue-100 text-blue-950">left</span>{' '}
           <span className="inline-block px-1.5 rounded bg-red-100 text-red-950">right</span>{' '}
           <span className="inline-block px-1.5 rounded bg-amber-100 text-amber-950">center</span>{' '}

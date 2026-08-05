@@ -111,6 +111,20 @@ export const STANCE_OPTIONS: Stance[] = ['PRO', 'ANTI', 'NEUTRAL']
 
 export const DEFAULT_STANCE: Stance = 'NEUTRAL'
 
+/** Optional lean of the named actor in the conspiracy template. */
+export type ActorPoliticalLeaning = 'left' | 'right' | 'center' | 'unclear'
+
+export const ACTOR_POLITICAL_LEANING_OPTIONS: {
+  value: ActorPoliticalLeaning
+  short: string
+  label: string
+}[] = [
+  { value: 'left', short: 'L', label: 'Left' },
+  { value: 'right', short: 'R', label: 'Right' },
+  { value: 'center', short: 'C', label: 'Center' },
+  { value: 'unclear', short: 'U', label: 'Unclear' },
+]
+
 /** Soft max words for actor / action / target free-text slots. */
 export const TEMPLATE_MAX_WORDS = 100
 

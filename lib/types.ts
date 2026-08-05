@@ -48,6 +48,7 @@ export interface Rating {
   polarity_label: string | null
   stance: string
   actor: string | null
+  actor_political_leaning: string | null
   action: string | null
   target: string | null
   known_conspiracy: string | null

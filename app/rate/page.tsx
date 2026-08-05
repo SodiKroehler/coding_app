@@ -19,6 +19,7 @@ function emptyExtras(): RatingExtras {
   return {
     stance: DEFAULT_STANCE,
     actor: '',
+    actorPoliticalLeaning: '',
     action: '',
     target: '',
     knownConspiracy: '',
@@ -135,6 +136,7 @@ export default function RatePage() {
           note: note.trim() || null,
           stance: extras.stance,
           actor: extras.actor.trim() || null,
+          actor_political_leaning: extras.actorPoliticalLeaning || null,
           action: extras.action.trim() || null,
           target: extras.target.trim() || null,
           known_conspiracy: extras.knownConspiracy || null,
