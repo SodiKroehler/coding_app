@@ -2,8 +2,8 @@
 
 import { DIMENSIONS } from '@/lib/dimensions'
 import DimensionInfo from '@/components/DimensionInfo'
+import KnownConspiracySelect from '@/components/KnownConspiracySelect'
 import {
-  KNOWN_CONSPIRACIES,
   KNOWN_CONSPIRACY_OTHER,
   STANCE_OPTIONS,
   TEMPLATE_MAX_WORDS,
@@ -170,19 +170,17 @@ export default function RatingControls({
           Known conspiracy{' '}
           <span className="font-normal text-gray-400">(optional)</span>
         </p>
-        <select
+        <p className="text-xs text-gray-500 mb-2">
+          Highlight = ideology lean from the forest plot:{' '}
+          <span className="inline-block px-1.5 rounded bg-blue-100 text-blue-950">left</span>{' '}
+          <span className="inline-block px-1.5 rounded bg-red-100 text-red-950">right</span>{' '}
+          <span className="inline-block px-1.5 rounded bg-amber-100 text-amber-950">center</span>{' '}
+          <span className="inline-block px-1.5 rounded bg-white border border-gray-200 text-gray-700">unclear</span>
+        </p>
+        <KnownConspiracySelect
           value={extras.knownConspiracy}
-          onChange={(e) => onExtrasChange({ knownConspiracy: e.target.value })}
-          className={selectClass}
-        >
-          <option value="">— None —</option>
-          {KNOWN_CONSPIRACIES.map((label) => (
-            <option key={label} value={label}>
-              {label}
-            </option>
-          ))}
-          <option value={KNOWN_CONSPIRACY_OTHER}>Other</option>
-        </select>
+          onChange={(knownConspiracy) => onExtrasChange({ knownConspiracy })}
+        />
         {showOther && (
           <textarea
             value={extras.knownConspiracyOther}

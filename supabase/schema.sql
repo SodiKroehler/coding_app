@@ -81,22 +81,8 @@ CREATE TABLE ratings (
 );
 
 -- Known conspiracy dropdown options are static in the app
--- (lib/knownConspiracies.ts), not a DB table. Reference list:
---   Iran/Israel attack false flag for Epstein
---   Trump assassination attempt was staged
---   Trump Epstein child abuse (BlueAnon)
---   2024 election stolen from Harris
---   LA wildfires as gov/Israel inside job
---   Biden drugged before 2024 debate
---   JD Vance couch memoir claim
---   DC/Boulder attacks as false flags
---   Sascha Riley Trump abuse claims
---   Raisi crash as CIA/Mossad hit
---   Trump suppressing Epstein files
---   FBI Iran warning as war pretext
---   Vance and the Pope
---   Virginia Giuffre suicide narrative
---   Epstein eating children claims
+-- (lib/knownConspiracies.ts), not a DB table. Each option has a lean
+-- (left/right/center/unclear) used only for UI highlighting.
 -- Ratings may also store known_conspiracy = 'other' with free text in
 -- known_conspiracy_other.
 
