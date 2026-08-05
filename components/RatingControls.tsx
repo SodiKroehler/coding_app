@@ -148,35 +148,34 @@ export default function RatingControls({
           Fill any slots that apply — e.g. who is conspiring, what they&apos;re doing, toward what goal.
         </p>
         <div className="flex flex-col gap-2">
-          <div className="flex gap-2 items-start">
-            <div className="flex-1 min-w-0">
-              <TemplateField
-                value={extras.actor}
-                onChange={(actor) => onExtrasChange({ actor })}
-                placeholder="actor"
-              />
-            </div>
-            <div className="w-[9.5rem] shrink-0">
-              <label className="block text-[10px] font-medium text-gray-500 mb-1 leading-tight">
-                Actor political leaning
-              </label>
-              <select
-                value={extras.actorPoliticalLeaning}
-                onChange={(e) =>
-                  onExtrasChange({
-                    actorPoliticalLeaning: e.target.value as ActorPoliticalLeaning | '',
-                  })
-                }
-                className={selectClass}
-              >
-                <option value="">—</option>
-                {ACTOR_POLITICAL_LEANING_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.short} — {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="grid grid-cols-[1fr_10.5rem] gap-x-2 gap-y-1 items-start">
+            <label className="text-[10px] font-medium text-gray-500 leading-tight self-end">
+              Actor
+            </label>
+            <label className="text-[10px] font-medium text-gray-500 leading-tight self-end">
+              Actor political leaning
+            </label>
+            <TemplateField
+              value={extras.actor}
+              onChange={(actor) => onExtrasChange({ actor })}
+              placeholder="actor"
+            />
+            <select
+              value={extras.actorPoliticalLeaning}
+              onChange={(e) =>
+                onExtrasChange({
+                  actorPoliticalLeaning: e.target.value as ActorPoliticalLeaning | '',
+                })
+              }
+              className={selectClass}
+            >
+              <option value="">—</option>
+              {ACTOR_POLITICAL_LEANING_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.short} — {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <p className="text-sm text-gray-600 px-1">conspiring</p>
           <TemplateField

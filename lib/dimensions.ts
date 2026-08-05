@@ -57,7 +57,7 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: 'polarity',
-    label: 'Political Lean',
+    label: "Poster's political leaning",
     dbColumn: 'polarity_label',
     control: 'select',
     description:

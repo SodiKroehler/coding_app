@@ -87,7 +87,7 @@ export default function CodesPage() {
         <section>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Extended definitions</h2>
           <p className="text-sm text-gray-600 mb-1">
-            Detailed coder guidance for Political Lean, drawn from Pew&apos;s political typology.
+            Detailed coder guidance for Poster&apos;s political leaning, drawn from Pew&apos;s political typology.
             Use these when choosing among groups that look similar at a glance.
           </p>
           <p className="text-xs text-gray-500 mb-6">
