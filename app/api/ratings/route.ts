@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { LABEL_COLUMNS } from '@/lib/dimensions'
+import { DIMENSION_BY_COLUMN, LABEL_COLUMNS } from '@/lib/dimensions'
 import { STANCE_OPTIONS, type ActorPoliticalLeaning, type Stance } from '@/lib/knownConspiracies'
 
 const ACTOR_LEAN_VALUES: ActorPoliticalLeaning[] = ['left', 'right', 'center', 'unclear']
@@ -58,12 +58,22 @@ export async function POST(req: NextRequest) {
   const id = `${tweet_id}__${rater_id}__${round_id}`
   const supabase = createServerClient()
 
-  // Build only the label columns we know about
-  const labelData: Record<string, string> = {}
+  const labelData: Record<string, string | null> = {}
   for (const col of LABEL_COLUMNS) {
-    if (labels[col] !== undefined) {
-      labelData[col] = labels[col]
+    if (labels[col] === undefined) continue
+    const val = optText(labels[col])
+    const dim = DIMENSION_BY_COLUMN[col]
+    if (!val) {
+      if (dim?.required) {
+        return NextResponse.json({ error: `Missing required label: ${dim.label}` }, { status: 400 })
+      }
+      labelData[col] = null
+      continue
     }
+    if (dim && !dim.options.some((o) => o.value === val)) {
+      return NextResponse.json({ error: `Invalid value for ${col}` }, { status: 400 })
+    }
+    labelData[col] = val
   }
 
   const { error } = await supabase.from('ratings').insert({
@@ -84,7 +94,6 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     if (error.code === '23505') {
-      // Unique constraint violation — already rated
       return NextResponse.json({ error: 'Already rated' }, { status: 409 })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })

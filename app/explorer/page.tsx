@@ -137,10 +137,13 @@ export default function ExplorerPage() {
                         <td key={name} className="px-4 py-3">
                           {rl ? (
                             <div className="flex flex-col gap-0.5">
-                              {DIMENSIONS.map(d => {
-                                const val = d.dbColumn === 'conspiracy_label' ? rl.conspiracy_label : rl.polarity_label
+                              {DIMENSIONS.map((d) => {
+                                const val = (rl as Record<string, string | null>)[d.dbColumn]
                                 return val ? (
-                                  <span key={d.id} className="inline-block bg-indigo-100 text-indigo-700 rounded px-1.5 py-0.5 text-xs font-medium">
+                                  <span
+                                    key={d.id}
+                                    className="inline-block bg-indigo-100 text-indigo-700 rounded px-1.5 py-0.5 text-xs font-medium"
+                                  >
                                     {labelForValue(d.dbColumn, val)}
                                   </span>
                                 ) : null

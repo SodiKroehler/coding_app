@@ -1,13 +1,9 @@
 'use client'
 
 import { useEffect, useId, useState } from 'react'
-import type { Dimension } from '@/lib/dimensions'
+import { KNOWN_CONSPIRACIES } from '@/lib/knownConspiracies'
 
-interface Props {
-  dimension: Dimension
-}
-
-export default function DimensionInfo({ dimension }: Props) {
+export default function KnownConspiracyInfo() {
   const [open, setOpen] = useState(false)
   const titleId = useId()
 
@@ -25,7 +21,7 @@ export default function DimensionInfo({ dimension }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`About ${dimension.label}`}
+        aria-label="About known conspiracies"
         className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-gray-400 text-[10px] font-semibold text-gray-500 hover:border-indigo-500 hover:text-indigo-600 leading-none"
       >
         i
@@ -46,7 +42,7 @@ export default function DimensionInfo({ dimension }: Props) {
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <h2 id={titleId} className="text-base font-semibold text-gray-900">
-                {dimension.label}
+                Known conspiracies
               </h2>
               <button
                 type="button"
@@ -57,39 +53,22 @@ export default function DimensionInfo({ dimension }: Props) {
                 ✕
               </button>
             </div>
-
-            <p className="text-sm text-gray-600 leading-relaxed mb-3">{dimension.infoIntro}</p>
-
-            {dimension.infoLink && (
-              <p className="text-sm mb-4">
-                <a
-                  href={dimension.infoLink.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-indigo-600 hover:underline"
-                >
-                  {dimension.infoLink.label}
-                </a>
-              </p>
-            )}
-
-            {dimension.infoQuote && (
-              <blockquote className="text-sm text-gray-800 leading-relaxed border-l-2 border-indigo-300 pl-3 mb-4 italic">
-                “{dimension.infoQuote}”
-              </blockquote>
-            )}
-
+            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              Brief descriptions for each numbered item in the dropdown. Numbers are
+              alphabetical and display-only.
+            </p>
             <ul className="flex flex-col gap-3 mb-4">
-              {dimension.options.map((opt) => (
-                <li key={opt.value}>
-                  <p className="text-sm font-semibold text-gray-800">{opt.label}</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">{opt.description}</p>
+              {KNOWN_CONSPIRACIES.map((c) => (
+                <li key={c.label}>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {c.number}. {c.label}
+                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{c.description}</p>
                 </li>
               ))}
             </ul>
-
             <a
-              href={`/codes#${dimension.codebookAnchor}`}
+              href="/codes#known-cts"
               className="text-sm text-indigo-600 hover:underline"
               onClick={() => setOpen(false)}
             >

@@ -56,8 +56,9 @@ CREATE TABLE ratings (
   tweet_id                TEXT NOT NULL REFERENCES tweets(id),
   rater_id                UUID NOT NULL REFERENCES raters(id),
   round_id                UUID NOT NULL REFERENCES rounds(id),
-  conspiracy_label        TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear')),
-  polarity_label          TEXT CHECK (polarity_label IN (
+  conspiracy_label        TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear','borderline')),
+  post_polarity_label     TEXT CHECK (post_polarity_label IN ('left','right','center','unclear')),
+  poster_polarity_label   TEXT CHECK (poster_polarity_label IN (
                             'leftward_progressives',
                             'loyal_liberals',
                             'left_out_left',

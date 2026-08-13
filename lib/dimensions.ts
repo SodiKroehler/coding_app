@@ -15,11 +15,14 @@ export interface Dimension {
   dbColumn: string
   options: DimensionOption[]
   description: string
-  /** How the option picker is rendered in the rating UI */
   control: 'buttons' | 'select'
-  /** Opening copy for the info popup (supports plain text; link rendered separately) */
+  /** Must be set before submit */
+  required: boolean
+  /** Where it appears on the rate form */
+  rateSection: 'core' | 'end'
+  /** Codebook page anchor (without #) */
+  codebookAnchor: string
   infoIntro: string
-  /** Optional exact quote shown in the info popup */
   infoQuote?: string
   infoLink?: DimensionInfoLink
 }
@@ -30,10 +33,13 @@ export const DIMENSIONS: Dimension[] = [
     label: 'Conspiracy Classification',
     dbColumn: 'conspiracy_label',
     control: 'buttons',
+    required: true,
+    rateSection: 'core',
+    codebookAnchor: 'conspiracy',
     description:
       'Does this post assert or imply a conspiracy theory — a set of narratives accusing agents of a secretive, malevolent plot?',
     infoIntro:
-      'Use this dimension to decide whether the post asserts or implies a conspiracy theory. Apply the definition below when coding.',
+      'Use this dimension to decide whether the post asserts or implies a conspiracy theory. Apply the definition below when coding. See also ICWSM Additional guidelines in the codebook.',
     infoQuote:
       'A conspiracy theory is a set of narratives designed to accuse an agent(s) (be they individuals, groups, or organizations) of committing a specific action(s), which is believed to be working towards a secretive and malevolent objective(s) (secret plot).',
     options: [
@@ -49,6 +55,12 @@ export const DIMENSIONS: Dimension[] = [
         description: 'The post does not assert or imply a conspiracy theory.',
       },
       {
+        value: 'borderline',
+        label: 'Borderline',
+        description:
+          'Author intent is unclear enough that CT vs nonCT cannot be decided confidently; flag for discussion (ICWSM guideline: if unsure, prefer nonCT or Borderline).',
+      },
+      {
         value: 'unclear',
         label: 'Unclear',
         description: 'It is ambiguous whether the post qualifies as a conspiracy theory.',
@@ -56,14 +68,51 @@ export const DIMENSIONS: Dimension[] = [
     ],
   },
   {
-    id: 'polarity',
-    label: "Poster's political leaning",
-    dbColumn: 'polarity_label',
-    control: 'select',
-    description:
-      'Which Pew Research political typology group best matches the post’s political orientation or framing?',
+    id: 'post_polarity',
+    label: 'Post Polarity',
+    dbColumn: 'post_polarity_label',
+    control: 'buttons',
+    required: true,
+    rateSection: 'core',
+    codebookAnchor: 'post-polarity',
+    description: 'Coarse left / right / center / unclear lean of the post content itself.',
     infoIntro:
-      'These groups come from Pew Research Center’s June 2026 political typology study. Use them when deciding whether a tweet is left- or right-leaning — pick the group that best fits the content.',
+      'Mandatory coarse polarity of the post (not the poster’s Pew typology). Use Left / Right / Center / Unclear for the framing of the content.',
+    options: [
+      {
+        value: 'left',
+        label: 'Left',
+        description: 'The post’s content or framing leans left / Democratic / progressive.',
+      },
+      {
+        value: 'right',
+        label: 'Right',
+        description: 'The post’s content or framing leans right / Republican / conservative.',
+      },
+      {
+        value: 'center',
+        label: 'Center',
+        description: 'The post is centrist, mixed, or not clearly on either side.',
+      },
+      {
+        value: 'unclear',
+        label: 'Unclear',
+        description: 'Polarity cannot be determined from the post.',
+      },
+    ],
+  },
+  {
+    id: 'poster_polarity',
+    label: "Poster's political leaning",
+    dbColumn: 'poster_polarity_label',
+    control: 'select',
+    required: false,
+    rateSection: 'end',
+    codebookAnchor: 'poster-polarity',
+    description:
+      'Which Pew Research political typology group best matches the poster’s political orientation (optional).',
+    infoIntro:
+      'Optional. These groups come from Pew Research Center’s June 2026 political typology study. Use when you can place the poster (not just the post) into a typology group.',
     infoLink: {
       href: 'https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/',
       label: 'Beyond Red vs Blue: The Political Typology (Pew, June 2026)',
@@ -126,18 +175,23 @@ export const DIMENSIONS: Dimension[] = [
       {
         value: 'unclear',
         label: 'Unclear',
-        description: 'The post’s political lean cannot be mapped to a typology group with confidence.',
+        description: 'The poster’s lean cannot be mapped to a typology group with confidence.',
       },
     ],
   },
 ]
 
-// Map dbColumn → dimension for easy lookup
 export const DIMENSION_BY_COLUMN = Object.fromEntries(
   DIMENSIONS.map((d) => [d.dbColumn, d])
 )
 
 export const LABEL_COLUMNS = DIMENSIONS.map((d) => d.dbColumn)
+
+export const REQUIRED_DIMENSIONS = DIMENSIONS.filter((d) => d.required)
+
+export const CORE_DIMENSIONS = DIMENSIONS.filter((d) => d.rateSection === 'core')
+
+export const END_DIMENSIONS = DIMENSIONS.filter((d) => d.rateSection === 'end')
 
 export function labelForValue(dbColumn: string, value: string | null | undefined): string {
   if (value == null || value === '') return '—'

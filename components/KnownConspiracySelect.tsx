@@ -5,7 +5,6 @@ import {
   KNOWN_CONSPIRACIES,
   KNOWN_CONSPIRACY_OTHER,
   LEAN_OPTION_CLASS,
-  leanForKnownConspiracy,
   type ConspiracyLean,
 } from '@/lib/knownConspiracies'
 
@@ -40,14 +39,19 @@ export default function KnownConspiracySelect({ value, onChange }: Props) {
     }
   }, [open])
 
-  const selectedLean =
-    value === KNOWN_CONSPIRACY_OTHER ? null : leanForKnownConspiracy(value)
+  const selectedItem =
+    value && value !== KNOWN_CONSPIRACY_OTHER
+      ? KNOWN_CONSPIRACIES.find((c) => c.label === value)
+      : undefined
+  const selectedLean = selectedItem?.lean ?? null
   const displayLabel =
     value === ''
       ? '— None —'
       : value === KNOWN_CONSPIRACY_OTHER
         ? 'Other'
-        : value
+        : selectedItem
+          ? `${selectedItem.number}. ${selectedItem.label}`
+          : value
 
   return (
     <div ref={rootRef} className="relative">
@@ -101,7 +105,7 @@ export default function KnownConspiracySelect({ value, onChange }: Props) {
                     setOpen(false)
                   }}
                 >
-                  {item.label}
+                  {item.number}. {item.label}
                 </button>
               </li>
             )

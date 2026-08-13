@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { DIMENSIONS } from '@/lib/dimensions'
+import { REQUIRED_DIMENSIONS } from '@/lib/dimensions'
 import {
   DEFAULT_STANCE,
   KNOWN_CONSPIRACY_OTHER,
@@ -92,9 +92,9 @@ export default function RatePage() {
   async function handleSubmit() {
     if (!session || !tweet || !round || round === 'loading') return
 
-    const missing = DIMENSIONS.filter(d => !labels[d.dbColumn])
+    const missing = REQUIRED_DIMENSIONS.filter((d) => !labels[d.dbColumn])
     if (missing.length > 0) {
-      setError(`Please select: ${missing.map(d => d.label).join(', ')}`)
+      setError(`Please select: ${missing.map((d) => d.label).join(', ')}`)
       return
     }
 

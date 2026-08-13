@@ -8,7 +8,7 @@ Usage:
     python scripts/export_ratings.py --out ratings_r1.csv     # write to file instead of stdout
 
 Each row = one completed rating (unique tweet × rater × round combination).
-Label columns are flat (conspiracy_label, polarity_label, …).
+Label columns are flat (conspiracy_label, post_polarity_label, poster_polarity_label, …).
 Add new label columns to LABEL_COLUMNS as dimensions grow.
 """
 
@@ -21,11 +21,12 @@ from _env import supabase_client
 supabase = supabase_client()
 
 # Update this list when you add new label columns to the ratings table
-LABEL_COLUMNS = ["conspiracy_label", "polarity_label"]
+LABEL_COLUMNS = ["conspiracy_label", "post_polarity_label", "poster_polarity_label"]
 
 EXTRA_COLUMNS = [
     "stance",
     "actor",
+    "actor_political_leaning",
     "action",
     "target",
     "known_conspiracy",

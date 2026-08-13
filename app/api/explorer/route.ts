@@ -15,7 +15,8 @@ interface RatingRow {
   rater_id: string
   round_id: string
   conspiracy_label: string | null
-  polarity_label: string | null
+  post_polarity_label: string | null
+  poster_polarity_label: string | null
 }
 
 export async function GET(req: NextRequest) {
@@ -24,7 +25,6 @@ export async function GET(req: NextRequest) {
 
   const supabase = createServerClient()
 
-  // Fetch all assignments (with rater name)
   let assignmentQuery = supabase
     .from('assignments')
     .select('tweet_id, rater_id, round_id, raters(id, name)')
@@ -38,18 +38,14 @@ export async function GET(req: NextRequest) {
   const tweetIds = [...new Set(assignments.map((a) => a.tweet_id))]
   if (tweetIds.length === 0) return NextResponse.json({ rows: [] })
 
-  // Fetch tweets
   const { data: tweets, error: tErr } = await supabase
     .from('tweets')
     .select('*')
     .in('id', tweetIds)
   if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 })
 
-  // Fetch ratings (explicit column list avoids Supabase type parser issues)
-  let ratingsQuery = supabase
-    .from('ratings')
-    .select('tweet_id, rater_id, round_id, conspiracy_label, polarity_label')
-    .in('tweet_id', tweetIds)
+  const labelSelect = ['tweet_id', 'rater_id', 'round_id', ...LABEL_COLUMNS].join(', ')
+  let ratingsQuery = supabase.from('ratings').select(labelSelect).in('tweet_id', tweetIds)
 
   if (round_id) ratingsQuery = ratingsQuery.eq('round_id', round_id)
 
@@ -57,21 +53,18 @@ export async function GET(req: NextRequest) {
   if (rErr) return NextResponse.json({ error: rErr.message }, { status: 500 })
   const ratings = (rawRatings ?? []) as unknown as RatingRow[]
 
-  // Build rater name map: tweet_id → rater_id → name
   const raterNameMap: Record<string, Record<string, string>> = {}
   for (const a of assignments) {
     if (!raterNameMap[a.tweet_id]) raterNameMap[a.tweet_id] = {}
     if (a.raters) raterNameMap[a.tweet_id][a.rater_id] = a.raters.name
   }
 
-  // Index assignments by tweet
   const assignmentsByTweet: Record<string, AssignmentRow[]> = {}
   for (const a of assignments) {
     if (!assignmentsByTweet[a.tweet_id]) assignmentsByTweet[a.tweet_id] = []
     assignmentsByTweet[a.tweet_id].push(a)
   }
 
-  // Index ratings by tweet
   const ratingsByTweet: Record<string, RatingRow[]> = {}
   for (const r of ratings) {
     if (!ratingsByTweet[r.tweet_id]) ratingsByTweet[r.tweet_id] = []
@@ -87,15 +80,15 @@ export async function GET(req: NextRequest) {
       rater_id: r.rater_id,
       rater_name: nameMap[r.rater_id] ?? 'Unknown',
       conspiracy_label: r.conspiracy_label,
-      polarity_label: r.polarity_label,
+      post_polarity_label: r.post_polarity_label,
+      poster_polarity_label: r.poster_polarity_label,
     }))
 
-    // Detect disagreement across all label columns
     let hasDisagreement = false
     if (raterLabels.length >= 2) {
       for (const col of LABEL_COLUMNS) {
         const vals = raterLabels
-          .map((rl) => (col === 'conspiracy_label' ? rl.conspiracy_label : rl.polarity_label))
+          .map((rl) => rl[col as keyof typeof rl] as string | null)
           .filter(Boolean)
         if (vals.length >= 2 && new Set(vals).size > 1) {
           hasDisagreement = true
@@ -113,7 +106,6 @@ export async function GET(req: NextRequest) {
     }
   })
 
-  // Sort: disagreements first, then incomplete, then complete
   rows.sort((a, b) => {
     if (a.hasDisagreement !== b.hasDisagreement) return a.hasDisagreement ? -1 : 1
     const aComplete = a.totalRated >= a.totalAssigned

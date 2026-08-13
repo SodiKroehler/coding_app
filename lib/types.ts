@@ -45,7 +45,8 @@ export interface Rating {
   rater_id: string
   round_id: string
   conspiracy_label: string | null
-  polarity_label: string | null
+  post_polarity_label: string | null
+  poster_polarity_label: string | null
   stance: string
   actor: string | null
   actor_political_leaning: string | null
@@ -74,7 +75,8 @@ export interface ExplorerRow {
     rater_id: string
     rater_name: string
     conspiracy_label: string | null
-    polarity_label: string | null
+    post_polarity_label: string | null
+    poster_polarity_label: string | null
   }[]
   hasDisagreement: boolean
   totalAssigned: number

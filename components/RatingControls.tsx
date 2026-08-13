@@ -1,8 +1,13 @@
 'use client'
 
-import { DIMENSIONS } from '@/lib/dimensions'
+import {
+  CORE_DIMENSIONS,
+  END_DIMENSIONS,
+  type Dimension,
+} from '@/lib/dimensions'
 import DimensionInfo from '@/components/DimensionInfo'
 import KnownConspiracySelect from '@/components/KnownConspiracySelect'
+import KnownConspiracyInfo from '@/components/KnownConspiracyInfo'
 import {
   KNOWN_CONSPIRACY_OTHER,
   ACTOR_POLITICAL_LEANING_OPTIONS,
@@ -67,6 +72,62 @@ function TemplateField({
   )
 }
 
+function DimensionBlock({
+  dim,
+  values,
+  onChange,
+}: {
+  dim: Dimension
+  values: Record<string, string>
+  onChange: (col: string, val: string) => void
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-2">
+        <p className="text-sm font-semibold text-gray-700">{dim.label}</p>
+        {!dim.required && (
+          <span className="text-xs font-normal text-gray-400">(optional)</span>
+        )}
+        <DimensionInfo dimension={dim} />
+      </div>
+      {dim.control === 'select' ? (
+        <select
+          value={values[dim.dbColumn] ?? ''}
+          onChange={(e) => onChange(dim.dbColumn, e.target.value)}
+          className={selectClass}
+        >
+          <option value="">{dim.required ? 'Select…' : '— None —'}</option>
+          {dim.options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {dim.options.map((opt) => {
+            const selected = values[dim.dbColumn] === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => onChange(dim.dbColumn, opt.value)}
+                className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  selected
+                    ? 'bg-indigo-600 border-indigo-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-700 hover:border-indigo-400 hover:text-indigo-700'
+                }`}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function RatingControls({
   values,
   onChange,
@@ -76,52 +137,17 @@ export default function RatingControls({
   onExtrasChange,
 }: Props) {
   const showOther = extras.knownConspiracy === KNOWN_CONSPIRACY_OTHER
+  const isCT = values.conspiracy_label === 'CT'
+  const hasKnown =
+    (Boolean(extras.knownConspiracy) && extras.knownConspiracy !== KNOWN_CONSPIRACY_OTHER) ||
+    (extras.knownConspiracy === KNOWN_CONSPIRACY_OTHER &&
+      Boolean(extras.knownConspiracyOther.trim()))
+  const showTemplateHint = isCT && !hasKnown
 
   return (
     <div className="flex flex-col gap-6">
-      {DIMENSIONS.map((dim) => (
-        <div key={dim.id}>
-          <div className="flex items-center gap-1.5 mb-2">
-            <p className="text-sm font-semibold text-gray-700">{dim.label}</p>
-            <DimensionInfo dimension={dim} />
-          </div>
-          {dim.control === 'select' ? (
-            <select
-              value={values[dim.dbColumn] ?? ''}
-              onChange={(e) => onChange(dim.dbColumn, e.target.value)}
-              className={selectClass}
-            >
-              <option value="" disabled>
-                Select…
-              </option>
-              {dim.options.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {dim.options.map((opt) => {
-                const selected = values[dim.dbColumn] === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => onChange(dim.dbColumn, opt.value)}
-                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      selected
-                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                        : 'bg-white border-gray-300 text-gray-700 hover:border-indigo-400 hover:text-indigo-700'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
+      {CORE_DIMENSIONS.map((dim) => (
+        <DimensionBlock key={dim.id} dim={dim} values={values} onChange={onChange} />
       ))}
 
       <div>
@@ -140,13 +166,22 @@ export default function RatingControls({
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-1">
-          Conspiracy template{' '}
-          <span className="font-normal text-gray-400">(optional)</span>
-        </p>
+        <div className="flex items-center gap-1.5 mb-1">
+          <p className="text-sm font-semibold text-gray-700">
+            Conspiracy template{' '}
+            <span className="font-normal text-gray-400">(optional)</span>
+          </p>
+        </div>
         <p className="text-xs text-gray-500 mb-3">
-          Fill any slots that apply — e.g. who is conspiring, what they&apos;re doing, toward what goal.
+          Fill any slots that apply — e.g. who is conspiring, what they&apos;re doing, toward
+          what goal.
         </p>
+        {showTemplateHint && (
+          <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+            You marked this as a conspiracy theory without selecting a known conspiracy. Please
+            fill actor / action / goal if you can — not blocked if you leave them blank.
+          </p>
+        )}
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-[1fr_10.5rem] gap-x-2 gap-y-1 items-start">
             <label className="text-[10px] font-medium text-gray-500 leading-tight self-end">
@@ -193,16 +228,21 @@ export default function RatingControls({
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-2">
-          Known conspiracy{' '}
-          <span className="font-normal text-gray-400">(optional)</span>
-        </p>
+        <div className="flex items-center gap-1.5 mb-2">
+          <p className="text-sm font-semibold text-gray-700">
+            Known conspiracy{' '}
+            <span className="font-normal text-gray-400">(optional)</span>
+          </p>
+          <KnownConspiracyInfo />
+        </div>
         <p className="text-xs text-gray-500 mb-2">
-          Highlight = ideology lean {' '}
+          Highlight = ideology lean{' '}
           <span className="inline-block px-1.5 rounded bg-blue-100 text-blue-950">left</span>{' '}
           <span className="inline-block px-1.5 rounded bg-red-100 text-red-950">right</span>{' '}
           <span className="inline-block px-1.5 rounded bg-amber-100 text-amber-950">center</span>{' '}
-          <span className="inline-block px-1.5 rounded bg-white border border-gray-200 text-gray-700">unclear</span>
+          <span className="inline-block px-1.5 rounded bg-white border border-gray-200 text-gray-700">
+            unclear
+          </span>
         </p>
         <KnownConspiracySelect
           value={extras.knownConspiracy}
@@ -231,6 +271,10 @@ export default function RatingControls({
           className={`${inputClass} resize-y`}
         />
       </div>
+
+      {END_DIMENSIONS.map((dim) => (
+        <DimensionBlock key={dim.id} dim={dim} values={values} onChange={onChange} />
+      ))}
     </div>
   )
 }

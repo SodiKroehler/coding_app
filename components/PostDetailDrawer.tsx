@@ -116,7 +116,9 @@ export default function PostDetailDrawer({ row, onClose }: Props) {
                   <tr className="border-b text-left text-gray-500">
                     <th className="py-1 pr-4 font-medium">Rater</th>
                     {DIMENSIONS.map((d) => (
-                      <th key={d.id} className="py-1 pr-4 font-medium">{d.label}</th>
+                      <th key={d.id} className="py-1 pr-4 font-medium">
+                        {d.label}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -124,20 +126,18 @@ export default function PostDetailDrawer({ row, onClose }: Props) {
                   {raterLabels.map((rl) => (
                     <tr key={rl.rater_id} className="border-b last:border-0">
                       <td className="py-2 pr-4 font-semibold text-gray-700">{rl.rater_name}</td>
-                      <td className="py-2 pr-4">
-                        {rl.conspiracy_label ? (
-                          labelForValue('conspiracy_label', rl.conspiracy_label)
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {rl.polarity_label ? (
-                          labelForValue('polarity_label', rl.polarity_label)
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
+                      {DIMENSIONS.map((d) => {
+                        const val = (rl as Record<string, string | null>)[d.dbColumn]
+                        return (
+                          <td key={d.id} className="py-2 pr-4">
+                            {val ? (
+                              labelForValue(d.dbColumn, val)
+                            ) : (
+                              <span className="text-gray-300">—</span>
+                            )}
+                          </td>
+                        )
+                      })}
                     </tr>
                   ))}
                 </tbody>
