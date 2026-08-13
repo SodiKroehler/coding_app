@@ -68,16 +68,28 @@ export interface CodebookExample {
   tweet?: Tweet
 }
 
-// Explorer view: a tweet enriched with all rater labels
+// Explorer view: a tweet enriched with all rater rating fields
+export interface ExplorerRaterRating {
+  rater_id: string
+  rater_name: string
+  round_id: string
+  conspiracy_label: string | null
+  post_polarity_label: string | null
+  poster_polarity_label: string | null
+  stance: string | null
+  actor: string | null
+  actor_political_leaning: string | null
+  action: string | null
+  target: string | null
+  known_conspiracy: string | null
+  known_conspiracy_other: string | null
+  note: string | null
+  created_at: string | null
+}
+
 export interface ExplorerRow {
   tweet: Tweet
-  raterLabels: {
-    rater_id: string
-    rater_name: string
-    conspiracy_label: string | null
-    post_polarity_label: string | null
-    poster_polarity_label: string | null
-  }[]
+  raterLabels: ExplorerRaterRating[]
   hasDisagreement: boolean
   totalAssigned: number
   totalRated: number

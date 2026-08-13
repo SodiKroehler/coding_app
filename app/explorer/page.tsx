@@ -138,8 +138,8 @@ export default function ExplorerPage() {
                           {rl ? (
                             <div className="flex flex-col gap-0.5">
                               {DIMENSIONS.map((d) => {
-                                const val = (rl as Record<string, string | null>)[d.dbColumn]
-                                return val ? (
+                                const val = rl[d.dbColumn as keyof typeof rl]
+                                return typeof val === 'string' && val ? (
                                   <span
                                     key={d.id}
                                     className="inline-block bg-indigo-100 text-indigo-700 rounded px-1.5 py-0.5 text-xs font-medium"

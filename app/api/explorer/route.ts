@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { LABEL_COLUMNS } from '@/lib/dimensions'
-import type { ExplorerRow } from '@/lib/types'
+import type { ExplorerRaterRating, ExplorerRow } from '@/lib/types'
 
 interface AssignmentRow {
   tweet_id: string
@@ -10,13 +10,34 @@ interface AssignmentRow {
   raters: { id: string; name: string } | null
 }
 
-interface RatingRow {
+const RATING_EXTRA_COLUMNS = [
+  'stance',
+  'actor',
+  'actor_political_leaning',
+  'action',
+  'target',
+  'known_conspiracy',
+  'known_conspiracy_other',
+  'note',
+  'created_at',
+] as const
+
+type RatingRow = {
   tweet_id: string
   rater_id: string
   round_id: string
   conspiracy_label: string | null
   post_polarity_label: string | null
   poster_polarity_label: string | null
+  stance: string | null
+  actor: string | null
+  actor_political_leaning: string | null
+  action: string | null
+  target: string | null
+  known_conspiracy: string | null
+  known_conspiracy_other: string | null
+  note: string | null
+  created_at: string | null
 }
 
 export async function GET(req: NextRequest) {
@@ -44,7 +65,13 @@ export async function GET(req: NextRequest) {
     .in('id', tweetIds)
   if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 })
 
-  const labelSelect = ['tweet_id', 'rater_id', 'round_id', ...LABEL_COLUMNS].join(', ')
+  const labelSelect = [
+    'tweet_id',
+    'rater_id',
+    'round_id',
+    ...LABEL_COLUMNS,
+    ...RATING_EXTRA_COLUMNS,
+  ].join(', ')
   let ratingsQuery = supabase.from('ratings').select(labelSelect).in('tweet_id', tweetIds)
 
   if (round_id) ratingsQuery = ratingsQuery.eq('round_id', round_id)
@@ -76,19 +103,29 @@ export async function GET(req: NextRequest) {
     const tweetAssignments = assignmentsByTweet[tweet.id] ?? []
     const nameMap = raterNameMap[tweet.id] ?? {}
 
-    const raterLabels = tweetRatings.map((r) => ({
+    const raterLabels: ExplorerRaterRating[] = tweetRatings.map((r) => ({
       rater_id: r.rater_id,
       rater_name: nameMap[r.rater_id] ?? 'Unknown',
+      round_id: r.round_id,
       conspiracy_label: r.conspiracy_label,
       post_polarity_label: r.post_polarity_label,
       poster_polarity_label: r.poster_polarity_label,
+      stance: r.stance,
+      actor: r.actor,
+      actor_political_leaning: r.actor_political_leaning,
+      action: r.action,
+      target: r.target,
+      known_conspiracy: r.known_conspiracy,
+      known_conspiracy_other: r.known_conspiracy_other,
+      note: r.note,
+      created_at: r.created_at,
     }))
 
     let hasDisagreement = false
     if (raterLabels.length >= 2) {
       for (const col of LABEL_COLUMNS) {
         const vals = raterLabels
-          .map((rl) => rl[col as keyof typeof rl] as string | null)
+          .map((rl) => rl[col as keyof ExplorerRaterRating] as string | null)
           .filter(Boolean)
         if (vals.length >= 2 && new Set(vals).size > 1) {
           hasDisagreement = true
