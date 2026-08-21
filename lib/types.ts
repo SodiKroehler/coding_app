@@ -90,7 +90,9 @@ export interface ExplorerRaterRating {
 export interface ExplorerRow {
   tweet: Tweet
   raterLabels: ExplorerRaterRating[]
+  consensusRatings: ExplorerRaterRating[]
   hasDisagreement: boolean
+  hasConsensus: boolean
   totalAssigned: number
   totalRated: number
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isConsensusRater } from '@/lib/consensus'
 import { createServerClient } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
@@ -19,6 +20,10 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error || !rater) {
+    return NextResponse.json({ error: 'Invalid email or PIN' }, { status: 401 })
+  }
+
+  if (isConsensusRater(rater)) {
     return NextResponse.json({ error: 'Invalid email or PIN' }, { status: 401 })
   }
 

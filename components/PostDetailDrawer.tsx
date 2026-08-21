@@ -13,6 +13,7 @@ import PlatformBadge from './PlatformBadge'
 interface Props {
   row: ExplorerRow | null
   onClose: () => void
+  ignoreEscape?: boolean
 }
 
 function formatDate(iso: string | null) {
@@ -59,8 +60,16 @@ function knownConspiracyDisplay(rl: ExplorerRaterRating) {
   return known ? `${known.number}. ${known.label}` : rl.known_conspiracy
 }
 
-function RaterRatingCard({ rating }: { rating: ExplorerRaterRating }) {
-  const [open, setOpen] = useState(false)
+function RaterRatingCard({
+  rating,
+  emphasis,
+  defaultOpen = false,
+}: {
+  rating: ExplorerRaterRating
+  emphasis?: boolean
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
   const summary = DIMENSIONS.map((d) => {
     const val = rating[d.dbColumn as keyof ExplorerRaterRating] as string | null
     return val ? labelForValue(d.dbColumn, val) : null
@@ -69,7 +78,11 @@ function RaterRatingCard({ rating }: { rating: ExplorerRaterRating }) {
     .join(' · ')
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+    <div
+      className={`border rounded-xl overflow-hidden ${
+        emphasis ? 'border-emerald-300 bg-emerald-50/40' : 'border-gray-200 bg-white'
+      }`}
+    >
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -141,19 +154,20 @@ function RaterRatingCard({ rating }: { rating: ExplorerRaterRating }) {
   )
 }
 
-export default function PostDetailDrawer({ row, onClose }: Props) {
+export default function PostDetailDrawer({ row, onClose, ignoreEscape }: Props) {
   useEffect(() => {
-    if (!row) return
+    if (!row || ignoreEscape) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [row, onClose])
+  }, [row, onClose, ignoreEscape])
 
   if (!row) return null
 
-  const { tweet, raterLabels } = row
+  const { tweet, raterLabels, consensusRatings } = row
+  const consensusCards = consensusRatings ?? []
   const metadata = tweet.metadata ?? {}
   const title =
     metadata.title != null && String(metadata.title).trim()
@@ -262,12 +276,20 @@ export default function PostDetailDrawer({ row, onClose }: Props) {
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
               Ratings
             </p>
-            {raterLabels.length === 0 ? (
+            {raterLabels.length === 0 && consensusCards.length === 0 ? (
               <p className="text-sm text-gray-400">No ratings yet.</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {raterLabels.map((rl) => (
                   <RaterRatingCard key={`${rl.rater_id}-${rl.round_id}`} rating={rl} />
+                ))}
+                {consensusCards.map((rl) => (
+                  <RaterRatingCard
+                    key={`${rl.rater_id}-${rl.round_id}`}
+                    rating={rl}
+                    emphasis
+                    defaultOpen
+                  />
                 ))}
               </div>
             )}

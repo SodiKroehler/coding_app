@@ -65,6 +65,11 @@ export const DIMENSIONS: Dimension[] = [
         label: 'Unclear',
         description: 'It is ambiguous whether the post qualifies as a conspiracy theory.',
       },
+      {
+        value: 'link_to_ct',
+        label: 'Link to a CT',
+        description: 'The post links to or references a conspiracy theory without itself asserting one.',
+      },
     ],
   },
   {

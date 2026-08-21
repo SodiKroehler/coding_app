@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { CONSENSUS_RATER_NAME, getConsensusRaterId } from '@/lib/consensus'
 import { LABEL_COLUMNS } from '@/lib/dimensions'
+import { createServerClient } from '@/lib/supabase'
 import type { ExplorerRaterRating, ExplorerRow } from '@/lib/types'
 
 interface AssignmentRow {
   tweet_id: string
   rater_id: string
   round_id: string
-  raters: { id: string; name: string } | null
 }
 
 const RATING_EXTRA_COLUMNS = [
@@ -40,15 +40,39 @@ type RatingRow = {
   created_at: string | null
 }
 
+function toExplorerRating(
+  r: RatingRow,
+  raterName: string
+): ExplorerRaterRating {
+  return {
+    rater_id: r.rater_id,
+    rater_name: raterName,
+    round_id: r.round_id,
+    conspiracy_label: r.conspiracy_label,
+    post_polarity_label: r.post_polarity_label,
+    poster_polarity_label: r.poster_polarity_label,
+    stance: r.stance,
+    actor: r.actor,
+    actor_political_leaning: r.actor_political_leaning,
+    action: r.action,
+    target: r.target,
+    known_conspiracy: r.known_conspiracy,
+    known_conspiracy_other: r.known_conspiracy_other,
+    note: r.note,
+    created_at: r.created_at,
+  }
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const round_id = searchParams.get('round_id')
 
   const supabase = createServerClient()
+  const consensusId = await getConsensusRaterId(supabase)
 
   let assignmentQuery = supabase
     .from('assignments')
-    .select('tweet_id, rater_id, round_id, raters(id, name)')
+    .select('tweet_id, rater_id, round_id')
 
   if (round_id) assignmentQuery = assignmentQuery.eq('round_id', round_id)
 
@@ -65,6 +89,13 @@ export async function GET(req: NextRequest) {
     .in('id', tweetIds)
   if (tErr) return NextResponse.json({ error: tErr.message }, { status: 500 })
 
+  const { data: raters, error: ratersErr } = await supabase.from('raters').select('id, name')
+  if (ratersErr) return NextResponse.json({ error: ratersErr.message }, { status: 500 })
+  const namesById: Record<string, string> = {}
+  for (const r of raters ?? []) {
+    namesById[r.id] = r.name
+  }
+
   const labelSelect = [
     'tweet_id',
     'rater_id',
@@ -79,12 +110,6 @@ export async function GET(req: NextRequest) {
   const { data: rawRatings, error: rErr } = await ratingsQuery
   if (rErr) return NextResponse.json({ error: rErr.message }, { status: 500 })
   const ratings = (rawRatings ?? []) as unknown as RatingRow[]
-
-  const raterNameMap: Record<string, Record<string, string>> = {}
-  for (const a of assignments) {
-    if (!raterNameMap[a.tweet_id]) raterNameMap[a.tweet_id] = {}
-    if (a.raters) raterNameMap[a.tweet_id][a.rater_id] = a.raters.name
-  }
 
   const assignmentsByTweet: Record<string, AssignmentRow[]> = {}
   for (const a of assignments) {
@@ -101,25 +126,19 @@ export async function GET(req: NextRequest) {
   const rows: ExplorerRow[] = (tweets ?? []).map((tweet) => {
     const tweetRatings = ratingsByTweet[tweet.id] ?? []
     const tweetAssignments = assignmentsByTweet[tweet.id] ?? []
-    const nameMap = raterNameMap[tweet.id] ?? {}
 
-    const raterLabels: ExplorerRaterRating[] = tweetRatings.map((r) => ({
-      rater_id: r.rater_id,
-      rater_name: nameMap[r.rater_id] ?? 'Unknown',
-      round_id: r.round_id,
-      conspiracy_label: r.conspiracy_label,
-      post_polarity_label: r.post_polarity_label,
-      poster_polarity_label: r.poster_polarity_label,
-      stance: r.stance,
-      actor: r.actor,
-      actor_political_leaning: r.actor_political_leaning,
-      action: r.action,
-      target: r.target,
-      known_conspiracy: r.known_conspiracy,
-      known_conspiracy_other: r.known_conspiracy_other,
-      note: r.note,
-      created_at: r.created_at,
-    }))
+    const humanRatings = tweetRatings.filter((r) => r.rater_id !== consensusId)
+    const consensusRows = consensusId
+      ? tweetRatings.filter((r) => r.rater_id === consensusId)
+      : []
+
+    const raterLabels: ExplorerRaterRating[] = humanRatings.map((r) =>
+      toExplorerRating(r, namesById[r.rater_id] ?? 'Unknown')
+    )
+
+    const consensusRatings: ExplorerRaterRating[] = consensusRows.map((r) =>
+      toExplorerRating(r, namesById[r.rater_id] ?? CONSENSUS_RATER_NAME)
+    )
 
     let hasDisagreement = false
     if (raterLabels.length >= 2) {
@@ -137,9 +156,11 @@ export async function GET(req: NextRequest) {
     return {
       tweet,
       raterLabels,
+      consensusRatings,
       hasDisagreement,
+      hasConsensus: consensusRatings.length > 0,
       totalAssigned: tweetAssignments.length,
-      totalRated: tweetRatings.length,
+      totalRated: humanRatings.length,
     }
   })
 

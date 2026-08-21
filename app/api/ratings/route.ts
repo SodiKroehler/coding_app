@@ -1,95 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getConsensusRaterId } from '@/lib/consensus'
+import { parseRatingWriteBody } from '@/lib/ratingWrite'
 import { createServerClient } from '@/lib/supabase'
-import { DIMENSION_BY_COLUMN, LABEL_COLUMNS } from '@/lib/dimensions'
-import { STANCE_OPTIONS, type ActorPoliticalLeaning, type Stance } from '@/lib/knownConspiracies'
-
-const ACTOR_LEAN_VALUES: ActorPoliticalLeaning[] = ['left', 'right', 'center', 'unclear']
-
-function optText(value: unknown): string | null {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  return trimmed || null
-}
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const {
-    tweet_id,
-    rater_id,
-    round_id,
-    labels,
-    note,
-    stance,
-    actor,
-    actor_political_leaning,
-    action,
-    target,
-    known_conspiracy,
-    known_conspiracy_other,
-  } = body as {
-    tweet_id: string
-    rater_id: string
-    round_id: string
-    labels: Record<string, string>
-    note?: string | null
-    stance?: string
-    actor?: string | null
-    actor_political_leaning?: string | null
-    action?: string | null
-    target?: string | null
-    known_conspiracy?: string | null
-    known_conspiracy_other?: string | null
+  const parsed = parseRatingWriteBody(body, { requireRaterId: true })
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
   }
 
-  if (!tweet_id || !rater_id || !round_id || !labels) {
+  const { tweet_id, rater_id, round_id, columns } = parsed.data
+  if (!rater_id) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const resolvedStance = (stance ?? 'NEUTRAL') as Stance
-  if (!STANCE_OPTIONS.includes(resolvedStance)) {
-    return NextResponse.json({ error: 'Invalid stance' }, { status: 400 })
-  }
-
-  const actorLean = optText(actor_political_leaning)
-  if (actorLean && !ACTOR_LEAN_VALUES.includes(actorLean as ActorPoliticalLeaning)) {
-    return NextResponse.json({ error: 'Invalid actor_political_leaning' }, { status: 400 })
+  const supabase = createServerClient()
+  const consensusId = await getConsensusRaterId(supabase)
+  if (consensusId && rater_id === consensusId) {
+    return NextResponse.json(
+      { error: 'CONSENSUS ratings cannot be created from /rate' },
+      { status: 400 }
+    )
   }
 
   const id = `${tweet_id}__${rater_id}__${round_id}`
-  const supabase = createServerClient()
-
-  const labelData: Record<string, string | null> = {}
-  for (const col of LABEL_COLUMNS) {
-    if (labels[col] === undefined) continue
-    const val = optText(labels[col])
-    const dim = DIMENSION_BY_COLUMN[col]
-    if (!val) {
-      if (dim?.required) {
-        return NextResponse.json({ error: `Missing required label: ${dim.label}` }, { status: 400 })
-      }
-      labelData[col] = null
-      continue
-    }
-    if (dim && !dim.options.some((o) => o.value === val)) {
-      return NextResponse.json({ error: `Invalid value for ${col}` }, { status: 400 })
-    }
-    labelData[col] = val
-  }
-
   const { error } = await supabase.from('ratings').insert({
     id,
     tweet_id,
     rater_id,
     round_id,
-    stance: resolvedStance,
-    actor: optText(actor),
-    actor_political_leaning: actorLean,
-    action: optText(action),
-    target: optText(target),
-    known_conspiracy: optText(known_conspiracy),
-    known_conspiracy_other: optText(known_conspiracy_other),
-    note: optText(note),
-    ...labelData,
+    ...columns,
   })
 
   if (error) {
@@ -100,4 +41,43 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ id }, { status: 201 })
+}
+
+export async function PATCH(req: NextRequest) {
+  const body = await req.json()
+  const parsed = parseRatingWriteBody(body, { requireRaterId: true })
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
+  }
+
+  const { tweet_id, rater_id, round_id, columns } = parsed.data
+  if (!rater_id) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  }
+
+  const supabase = createServerClient()
+  const consensusId = await getConsensusRaterId(supabase)
+  if (consensusId && rater_id === consensusId) {
+    return NextResponse.json(
+      { error: 'CONSENSUS ratings must be saved via /api/ratings/consensus' },
+      { status: 400 }
+    )
+  }
+
+  const { data, error } = await supabase
+    .from('ratings')
+    .update(columns)
+    .eq('tweet_id', tweet_id)
+    .eq('rater_id', rater_id)
+    .eq('round_id', round_id)
+    .select('id')
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+  if (!data?.length) {
+    return NextResponse.json({ error: 'Rating not found' }, { status: 404 })
+  }
+
+  return NextResponse.json({ id: data[0].id })
 }

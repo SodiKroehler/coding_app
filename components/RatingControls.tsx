@@ -17,16 +17,9 @@ import {
   type ActorPoliticalLeaning,
   type Stance,
 } from '@/lib/knownConspiracies'
+import type { RatingExtras } from '@/lib/ratingFormTypes'
 
-export interface RatingExtras {
-  stance: Stance
-  actor: string
-  actorPoliticalLeaning: ActorPoliticalLeaning | ''
-  action: string
-  target: string
-  knownConspiracy: string
-  knownConspiracyOther: string
-}
+export type { RatingExtras }
 
 interface Props {
   values: Record<string, string>
@@ -151,7 +144,7 @@ export default function RatingControls({
       ))}
 
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-2">Stance</p>
+        <p className="text-sm font-semibold text-gray-700 mb-2">Author&apos;s stance w.r.t. the CT</p>
         <select
           value={extras.stance}
           onChange={(e) => onExtrasChange({ stance: e.target.value as Stance })}

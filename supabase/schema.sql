@@ -22,6 +22,18 @@ CREATE TABLE raters (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- CONSENSUS is a special rater for team gold labels. Nobody logs in as this
+-- user (the app rejects this email/name at /api/login). Do not create
+-- assignments for it — that would inflate Incomplete on Explorer.
+INSERT INTO raters (id, name, email, pin)
+VALUES (
+  '00000000-0000-4000-a000-000000000001',
+  'CONSENSUS',
+  'consensus@internal.invalid',
+  'not-a-login'
+)
+ON CONFLICT (email) DO NOTHING;
+
 -- Source posts
 CREATE TABLE tweets (
   id                      TEXT PRIMARY KEY,
@@ -49,14 +61,16 @@ CREATE TABLE assignments (
   UNIQUE (tweet_id, rater_id, round_id)
 );
 
--- Ratings: append-only, never updated
+-- Ratings: one row per (tweet, rater, round).
+-- Human rows are created from /rate (insert) and may be updated in place from Explorer.
+-- CONSENSUS rater rows are gold labels: insert on first save, update after.
 -- Flat label columns — add new ones with ALTER TABLE ADD COLUMN as dimensions grow
 CREATE TABLE ratings (
   id                      TEXT PRIMARY KEY,  -- {tweet_id}__{rater_id}__{round_id}
   tweet_id                TEXT NOT NULL REFERENCES tweets(id),
   rater_id                UUID NOT NULL REFERENCES raters(id),
   round_id                UUID NOT NULL REFERENCES rounds(id),
-  conspiracy_label        TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear','borderline')),
+  conspiracy_label        TEXT CHECK (conspiracy_label IN ('CT','nonCT','unclear','borderline','link_to_ct')),
   post_polarity_label     TEXT CHECK (post_polarity_label IN ('left','right','center','unclear')),
   poster_polarity_label   TEXT CHECK (poster_polarity_label IN (
                             'leftward_progressives',
