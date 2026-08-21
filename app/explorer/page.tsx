@@ -99,10 +99,7 @@ export default function ExplorerPage() {
       setHeaderError('Log in to edit your ratings.')
       return
     }
-    if (!selected) {
-      setHeaderError('Select a row first.')
-      return
-    }
+    if (!selected) return
     const mine = selected.raterLabels.find(rl => rl.rater_id === session.id)
     if (!mine) {
       setHeaderError('You have no rating on this post.')
@@ -111,33 +108,12 @@ export default function ExplorerPage() {
     openEditor('edit-mine', mine, selected)
   }
 
-  const pencilDisabled = !session || !selected
-
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b px-6 py-3 flex items-center gap-4 flex-wrap">
         <Link href="/" className="text-gray-400 hover:text-gray-700 text-sm">← Home</Link>
         <h1 className="font-semibold text-gray-900">Explorer</h1>
-        <button
-          type="button"
-          onClick={handlePencil}
-          disabled={pencilDisabled}
-          title={
-            !session
-              ? 'Log in to edit your ratings'
-              : !selected
-                ? 'Select a row, then edit your rating'
-                : 'Edit your rating on the selected post'
-          }
-          className="p-1.5 rounded-md text-gray-500 hover:text-indigo-700 hover:bg-indigo-50 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500"
-          aria-label="Edit your rating"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.07 2.07 0 0 1 2.93 2.93L8.25 18.96 3 20.25l1.29-5.25 12.572-11.513z" />
-          </svg>
-        </button>
         <div className="flex-1" />
-        {headerError && <p className="text-sm text-red-600">{headerError}</p>}
         <select
           value={selectedRoundId}
           onChange={e => setSelectedRoundId(e.target.value)}
@@ -278,8 +254,10 @@ export default function ExplorerPage() {
 
       <PostDetailDrawer
         row={selected}
-        onClose={() => setSelected(null)}
+        onClose={() => { setSelected(null); setHeaderError(null) }}
         ignoreEscape={!!editor}
+        onEditMine={session ? handlePencil : undefined}
+        editError={headerError}
       />
 
       {editor && session && (

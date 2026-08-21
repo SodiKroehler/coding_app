@@ -14,6 +14,8 @@ interface Props {
   row: ExplorerRow | null
   onClose: () => void
   ignoreEscape?: boolean
+  onEditMine?: () => void
+  editError?: string | null
 }
 
 function formatDate(iso: string | null) {
@@ -154,7 +156,7 @@ function RaterRatingCard({
   )
 }
 
-export default function PostDetailDrawer({ row, onClose, ignoreEscape }: Props) {
+export default function PostDetailDrawer({ row, onClose, ignoreEscape, onEditMine, editError }: Props) {
   useEffect(() => {
     if (!row || ignoreEscape) return
     const onKey = (e: KeyboardEvent) => {
@@ -210,15 +212,31 @@ export default function PostDetailDrawer({ row, onClose, ignoreEscape }: Props) 
               <span className="text-xs text-gray-500">{formatDate(tweet.posted_at)}</span>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {onEditMine && (
+              <button
+                type="button"
+                onClick={onEditMine}
+                title="Edit your rating"
+                aria-label="Edit your rating"
+                className="p-1.5 rounded-md text-gray-500 hover:text-indigo-700 hover:bg-indigo-50"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.07 2.07 0 0 1 2.93 2.93L8.25 18.96 3 20.25l1.29-5.25 12.572-11.513z" />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="p-6 flex flex-col gap-6">
+          {editError && <p className="text-sm text-red-600">{editError}</p>}
           {showTitleBlock && (
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
