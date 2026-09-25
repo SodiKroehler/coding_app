@@ -80,7 +80,7 @@ export default function DimensionInfo({ dimension }: Props) {
             )}
 
             <ul className="flex flex-col gap-3 mb-4">
-              {dimension.options.map((opt) => (
+              {dimension.options.filter((opt) => !opt.hidden).map((opt) => (
                 <li key={opt.value}>
                   <p className="text-sm font-semibold text-gray-800">{opt.label}</p>
                   <p className="text-sm text-gray-600 leading-relaxed">{opt.description}</p>

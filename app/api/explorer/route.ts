@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CONSENSUS_RATER_NAME, getConsensusRaterId } from '@/lib/consensus'
 import { LABEL_COLUMNS } from '@/lib/dimensions'
+import { DEFAULT_DISAGREEMENT_THRESHOLD, disagreementScore } from '@/lib/disagreement'
 import { createServerClient } from '@/lib/supabase'
 import type { ExplorerRaterRating, ExplorerRow } from '@/lib/types'
 
@@ -14,6 +15,8 @@ const RATING_EXTRA_COLUMNS = [
   'stance',
   'actor',
   'actor_political_leaning',
+  'actor_portrayal',
+  'victim_political_leaning',
   'action',
   'target',
   'known_conspiracy',
@@ -32,6 +35,8 @@ type RatingRow = {
   stance: string | null
   actor: string | null
   actor_political_leaning: string | null
+  actor_portrayal: string | null
+  victim_political_leaning: string | null
   action: string | null
   target: string | null
   known_conspiracy: string | null
@@ -54,6 +59,8 @@ function toExplorerRating(
     stance: r.stance,
     actor: r.actor,
     actor_political_leaning: r.actor_political_leaning,
+    actor_portrayal: r.actor_portrayal,
+    victim_political_leaning: r.victim_political_leaning,
     action: r.action,
     target: r.target,
     known_conspiracy: r.known_conspiracy,
@@ -140,24 +147,14 @@ export async function GET(req: NextRequest) {
       toExplorerRating(r, namesById[r.rater_id] ?? CONSENSUS_RATER_NAME)
     )
 
-    let hasDisagreement = false
-    if (raterLabels.length >= 2) {
-      for (const col of LABEL_COLUMNS) {
-        const vals = raterLabels
-          .map((rl) => rl[col as keyof ExplorerRaterRating] as string | null)
-          .filter(Boolean)
-        if (vals.length >= 2 && new Set(vals).size > 1) {
-          hasDisagreement = true
-          break
-        }
-      }
-    }
+    const score = disagreementScore(raterLabels)
 
     return {
       tweet,
       raterLabels,
       consensusRatings,
-      hasDisagreement,
+      disagreementScore: score,
+      hasDisagreement: score >= DEFAULT_DISAGREEMENT_THRESHOLD,
       hasConsensus: consensusRatings.length > 0,
       totalAssigned: tweetAssignments.length,
       totalRated: humanRatings.length,
@@ -165,7 +162,7 @@ export async function GET(req: NextRequest) {
   })
 
   rows.sort((a, b) => {
-    if (a.hasDisagreement !== b.hasDisagreement) return a.hasDisagreement ? -1 : 1
+    if (a.disagreementScore !== b.disagreementScore) return b.disagreementScore - a.disagreementScore
     const aComplete = a.totalRated >= a.totalAssigned
     const bComplete = b.totalRated >= b.totalAssigned
     if (aComplete !== bComplete) return aComplete ? 1 : -1

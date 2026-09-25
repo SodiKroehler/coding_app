@@ -2,6 +2,8 @@ export interface DimensionOption {
   value: string
   label: string
   description: string
+  /** Kept valid for existing data, but not offered as a choice on the form */
+  hidden?: boolean
 }
 
 export interface DimensionInfoLink {
@@ -25,7 +27,13 @@ export interface Dimension {
   infoIntro: string
   infoQuote?: string
   infoLink?: DimensionInfoLink
+  /** How much a split on this field counts toward the Explorer disagreement score */
+  disagreementWeight: number
+  /** Distance between two different values in [0, 1]; defaults to 1 */
+  distance?: (a: string, b: string) => number
 }
+
+const POLARITY_POSITION: Record<string, number> = { left: -1, center: 0, unclear: 0, right: 1 }
 
 export const DIMENSIONS: Dimension[] = [
   {
@@ -36,6 +44,12 @@ export const DIMENSIONS: Dimension[] = [
     required: true,
     rateSection: 'core',
     codebookAnchor: 'conspiracy',
+    disagreementWeight: 1,
+    // CT vs nonCT is a full split; anything involving borderline / unclear / link is half
+    distance: (a, b) => {
+      const pair = new Set([a, b])
+      return pair.has('CT') && pair.has('nonCT') ? 1 : 0.5
+    },
     description:
       'Does this post assert or imply a conspiracy theory — a set of narratives accusing agents of a secretive, malevolent plot?',
     infoIntro:
@@ -74,35 +88,49 @@ export const DIMENSIONS: Dimension[] = [
   },
   {
     id: 'post_polarity',
-    label: 'Post Polarity',
+    label: "Post's Ideological Alignment",
     dbColumn: 'post_polarity_label',
     control: 'buttons',
     required: true,
     rateSection: 'core',
     codebookAnchor: 'post-polarity',
-    description: 'Coarse left / right / center / unclear lean of the post content itself.',
+    disagreementWeight: 1,
+    // left vs right is a full split; either vs center is half
+    distance: (a, b) =>
+      Math.abs((POLARITY_POSITION[a] ?? 0) - (POLARITY_POSITION[b] ?? 0)) / 2,
+    description:
+      "Do the post's claims align with values or political positions of Pew's left-oriented or right-oriented political typology groups?",
     infoIntro:
-      'Mandatory coarse polarity of the post (not the poster’s Pew typology). Use Left / Right / Center / Unclear for the framing of the content.',
+      "Proxy 1 of the working definition of a CT's political leaning (draft). Judge the claims of the post itself, not the poster. Use the political landscape at the time the post was made, or at the time the CT refers to if it concerns a specific historical period (e.g., the Obama administration).",
+    infoQuote:
+      "A CT is classified according to whether its claims align with values or political positions associated with one or more of Pew Research Center's left-oriented political typology groups at the time the CT post was made, or at the time referenced by the CT if it concerns a specific historical period.",
+    infoLink: {
+      href: 'https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/',
+      label: 'Beyond Red vs Blue: The Political Typology (Pew, June 2026)',
+    },
     options: [
       {
         value: 'left',
         label: 'Left',
-        description: 'The post’s content or framing leans left / Democratic / progressive.',
+        description:
+          "The post's claims align with values or positions of Pew's left-oriented typology groups.",
       },
       {
         value: 'right',
         label: 'Right',
-        description: 'The post’s content or framing leans right / Republican / conservative.',
+        description:
+          "The post's claims align with values or positions of Pew's right-oriented typology groups.",
       },
       {
         value: 'center',
-        label: 'Center',
-        description: 'The post is centrist, mixed, or not clearly on either side.',
+        label: 'Center / neither',
+        description: "The post's claims are centrist, mixed, or align with neither side.",
       },
       {
         value: 'unclear',
         label: 'Unclear',
-        description: 'Polarity cannot be determined from the post.',
+        description: 'Legacy option from earlier rounds; no longer offered on the form.',
+        hidden: true,
       },
     ],
   },
@@ -114,6 +142,7 @@ export const DIMENSIONS: Dimension[] = [
     required: false,
     rateSection: 'end',
     codebookAnchor: 'poster-polarity',
+    disagreementWeight: 0.1,
     description:
       'Which Pew Research political typology group best matches the poster’s political orientation (optional).',
     infoIntro:

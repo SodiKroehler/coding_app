@@ -11,11 +11,15 @@ import KnownConspiracyInfo from '@/components/KnownConspiracyInfo'
 import {
   KNOWN_CONSPIRACY_OTHER,
   ACTOR_POLITICAL_LEANING_OPTIONS,
+  ACTOR_PORTRAYAL_OPTIONS,
   STANCE_OPTIONS,
+  VICTIM_POLITICAL_LEANING_OPTIONS,
   TEMPLATE_MAX_WORDS,
   wordCount,
   type ActorPoliticalLeaning,
+  type ActorPortrayal,
   type Stance,
+  type VictimPoliticalLeaning,
 } from '@/lib/knownConspiracies'
 import type { RatingExtras } from '@/lib/ratingFormTypes'
 
@@ -77,7 +81,9 @@ function DimensionBlock({
   return (
     <div>
       <div className="flex items-center gap-1.5 mb-2">
-        <p className="text-sm font-semibold text-gray-700">{dim.label}</p>
+        <p className="text-sm font-semibold text-gray-700" title={dim.description}>
+          {dim.label}
+        </p>
         {!dim.required && (
           <span className="text-xs font-normal text-gray-400">(optional)</span>
         )}
@@ -90,7 +96,7 @@ function DimensionBlock({
           className={selectClass}
         >
           <option value="">{dim.required ? 'Select…' : '— None —'}</option>
-          {dim.options.map((opt) => (
+          {dim.options.filter((opt) => !opt.hidden).map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -98,12 +104,13 @@ function DimensionBlock({
         </select>
       ) : (
         <div className="flex flex-wrap gap-2">
-          {dim.options.map((opt) => {
+          {dim.options.filter((opt) => !opt.hidden).map((opt) => {
             const selected = values[dim.dbColumn] === opt.value
             return (
               <button
                 key={opt.value}
                 type="button"
+                title={opt.description}
                 onClick={() => onChange(dim.dbColumn, opt.value)}
                 className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   selected
@@ -176,12 +183,15 @@ export default function RatingControls({
           </p>
         )}
         <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-[1fr_10.5rem] gap-x-2 gap-y-1 items-start">
+          <div className="grid grid-cols-[1fr_8.5rem_7rem] gap-x-2 gap-y-1 items-start">
             <label className="text-[10px] font-medium text-gray-500 leading-tight self-end">
               Actor
             </label>
             <label className="text-[10px] font-medium text-gray-500 leading-tight self-end">
               Actor political leaning
+            </label>
+            <label className="text-[10px] font-medium text-gray-500 leading-tight self-end">
+              Actor portrayed as
             </label>
             <TemplateField
               value={extras.actor}
@@ -204,7 +214,25 @@ export default function RatingControls({
                 </option>
               ))}
             </select>
+            <select
+              value={extras.actorPortrayal}
+              onChange={(e) =>
+                onExtrasChange({ actorPortrayal: e.target.value as ActorPortrayal | '' })
+              }
+              className={selectClass}
+            >
+              <option value="">—</option>
+              {ACTOR_PORTRAYAL_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
+          <p className="text-[11px] text-gray-400 px-1 -mt-1">
+            The actor is whoever is alleged to be carrying out the conspiracy — not its target,
+            beneficiary, or subject.
+          </p>
           <p className="text-sm text-gray-600 px-1">conspiring</p>
           <TemplateField
             value={extras.action}
@@ -217,6 +245,30 @@ export default function RatingControls({
             onChange={(target) => onExtrasChange({ target })}
             placeholder="goal"
           />
+          <div className="mt-2">
+            <label className="block text-[10px] font-medium text-gray-500 leading-tight mb-1">
+              Political leaning of the conspiracy&apos;s target / victim
+            </label>
+            <select
+              value={extras.victimPoliticalLeaning}
+              onChange={(e) =>
+                onExtrasChange({
+                  victimPoliticalLeaning: e.target.value as VictimPoliticalLeaning | '',
+                })
+              }
+              className={selectClass}
+            >
+              <option value="">—</option>
+              {VICTIM_POLITICAL_LEANING_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Which side is portrayed as the target or victim of the alleged wrongdoing.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -50,6 +50,8 @@ export interface Rating {
   stance: string
   actor: string | null
   actor_political_leaning: string | null
+  actor_portrayal: string | null
+  victim_political_leaning: string | null
   action: string | null
   target: string | null
   known_conspiracy: string | null
@@ -79,6 +81,8 @@ export interface ExplorerRaterRating {
   stance: string | null
   actor: string | null
   actor_political_leaning: string | null
+  actor_portrayal: string | null
+  victim_political_leaning: string | null
   action: string | null
   target: string | null
   known_conspiracy: string | null
@@ -91,6 +95,9 @@ export interface ExplorerRow {
   tweet: Tweet
   raterLabels: ExplorerRaterRating[]
   consensusRatings: ExplorerRaterRating[]
+  /** Weighted disagreement score (see lib/disagreement.ts) */
+  disagreementScore: number
+  /** disagreementScore >= DEFAULT_DISAGREEMENT_THRESHOLD */
   hasDisagreement: boolean
   hasConsensus: boolean
   totalAssigned: number

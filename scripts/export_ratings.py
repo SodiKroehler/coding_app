@@ -27,6 +27,8 @@ EXTRA_COLUMNS = [
     "stance",
     "actor",
     "actor_political_leaning",
+    "actor_portrayal",
+    "victim_political_leaning",
     "action",
     "target",
     "known_conspiracy",
@@ -47,8 +49,28 @@ FIELDNAMES = [
     "round_description",
     *LABEL_COLUMNS,
     *EXTRA_COLUMNS,
+    "ct_leaning_actor_victim",
     "rated_at",
 ]
+
+
+# Proxy 2 (actor lean x portrayal); mirrors lib/ctLeaning.ts
+ACTOR_RULE = {
+    ("left", "bad"): "right",
+    ("left", "good"): "left",
+    ("right", "bad"): "left",
+    ("right", "good"): "right",
+}
+
+
+def ct_leaning(r: dict) -> str:
+    """Actor/victim-based CT leaning: rule 2 (actor), else rule 3 (victim), else unclear."""
+    by_actor = ACTOR_RULE.get((r.get("actor_political_leaning"), r.get("actor_portrayal")))
+    if by_actor:
+        return by_actor
+    if r.get("victim_political_leaning") in ("left", "right"):
+        return r["victim_political_leaning"]
+    return "unclear"
 
 
 def main(round_name: str | None, out_path: str | None):
@@ -102,6 +124,7 @@ def main(round_name: str | None, out_path: str | None):
             row[col] = r.get(col, "")
         for col in EXTRA_COLUMNS:
             row[col] = r.get(col) or ""
+        row["ct_leaning_actor_victim"] = ct_leaning(r)
         writer.writerow(row)
 
     if out_path:

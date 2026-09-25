@@ -2,13 +2,17 @@ import type { RatingExtras } from '@/lib/ratingFormTypes'
 import { LABEL_COLUMNS, REQUIRED_DIMENSIONS } from '@/lib/dimensions'
 import {
   ACTOR_POLITICAL_LEANING_OPTIONS,
+  ACTOR_PORTRAYAL_OPTIONS,
   DEFAULT_STANCE,
   KNOWN_CONSPIRACY_OTHER,
   STANCE_OPTIONS,
+  VICTIM_POLITICAL_LEANING_OPTIONS,
   TEMPLATE_MAX_WORDS,
   wordCount,
   type ActorPoliticalLeaning,
+  type ActorPortrayal,
   type Stance,
+  type VictimPoliticalLeaning,
 } from '@/lib/knownConspiracies'
 import type { ExplorerRaterRating } from '@/lib/types'
 
@@ -19,6 +23,8 @@ export function emptyExtras(): RatingExtras {
     stance: DEFAULT_STANCE,
     actor: '',
     actorPoliticalLeaning: '',
+    actorPortrayal: '',
+    victimPoliticalLeaning: '',
     action: '',
     target: '',
     knownConspiracy: '',
@@ -46,6 +52,16 @@ export function formFromRating(rating: ExplorerRaterRating): {
     ? (lean as ActorPoliticalLeaning)
     : ''
 
+  const portrayal = rating.actor_portrayal
+  const actorPortrayal = ACTOR_PORTRAYAL_OPTIONS.some((o) => o.value === portrayal)
+    ? (portrayal as ActorPortrayal)
+    : ''
+
+  const victimLean = rating.victim_political_leaning
+  const victimPoliticalLeaning = VICTIM_POLITICAL_LEANING_OPTIONS.some((o) => o.value === victimLean)
+    ? (victimLean as VictimPoliticalLeaning)
+    : ''
+
   return {
     labels,
     note: rating.note ?? '',
@@ -53,6 +69,8 @@ export function formFromRating(rating: ExplorerRaterRating): {
       stance,
       actor: rating.actor ?? '',
       actorPoliticalLeaning,
+      actorPortrayal,
+      victimPoliticalLeaning,
       action: rating.action ?? '',
       target: rating.target ?? '',
       knownConspiracy: rating.known_conspiracy ?? '',
@@ -111,6 +129,8 @@ export function ratingRequestPayload(args: {
     stance: args.extras.stance,
     actor: args.extras.actor.trim() || null,
     actor_political_leaning: args.extras.actorPoliticalLeaning || null,
+    actor_portrayal: args.extras.actorPortrayal || null,
+    victim_political_leaning: args.extras.victimPoliticalLeaning || null,
     action: args.extras.action.trim() || null,
     target: args.extras.target.trim() || null,
     known_conspiracy: args.extras.knownConspiracy || null,

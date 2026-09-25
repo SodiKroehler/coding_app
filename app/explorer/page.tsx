@@ -5,13 +5,16 @@ import Link from 'next/link'
 import type { ExplorerRaterRating, ExplorerRow, Round } from '@/lib/types'
 import { DIMENSIONS, labelForValue } from '@/lib/dimensions'
 import { getSession, type RaterSession } from '@/lib/auth'
+import { DEFAULT_DISAGREEMENT_THRESHOLD } from '@/lib/disagreement'
 import PlatformBadge from '@/components/PlatformBadge'
 import PostDetailDrawer from '@/components/PostDetailDrawer'
 import RatingEditorOverlay, {
   type RatingEditorMode,
 } from '@/components/RatingEditorOverlay'
 
-type Filter = 'all' | 'disagreement' | 'incomplete' | 'needs_consensus' | 'mine'
+type Filter = 'all' | 'disagreement' | 'minor' | 'incomplete' | 'needs_consensus' | 'mine'
+
+const THRESHOLD_STORAGE_KEY = 'explorer.disagreementThreshold'
 
 type EditorState = {
   mode: RatingEditorMode
@@ -39,12 +42,28 @@ export default function ExplorerPage() {
   const [loading, setLoading] = useState(true)
   const [editor, setEditor] = useState<EditorState | null>(null)
   const [headerError, setHeaderError] = useState<string | null>(null)
+  const [threshold, setThreshold] = useState(DEFAULT_DISAGREEMENT_THRESHOLD)
 
   useEffect(() => {
     // Session lives in localStorage; read after mount to avoid hydration mismatch.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only session
     setSession(getSession())
+    try {
+      const saved = Number(localStorage.getItem(THRESHOLD_STORAGE_KEY))
+      if (saved > 0) setThreshold(saved)
+    } catch {}
   }, [])
+
+  function updateThreshold(value: number) {
+    if (!(value > 0)) return
+    setThreshold(value)
+    try {
+      localStorage.setItem(THRESHOLD_STORAGE_KEY, String(value))
+    } catch {}
+  }
+
+  const isMajor = (row: ExplorerRow) => row.disagreementScore >= threshold
+  const isMinor = (row: ExplorerRow) => row.disagreementScore > 0 && !isMajor(row)
 
   useEffect(() => {
     fetch('/api/rounds').then(r => r.json()).then(d => {
@@ -76,9 +95,10 @@ export default function ExplorerPage() {
   }, [loadRows])
 
   const filtered = rows.filter(row => {
-    if (filter === 'disagreement') return row.hasDisagreement
+    if (filter === 'disagreement') return isMajor(row)
+    if (filter === 'minor') return isMinor(row)
     if (filter === 'incomplete') return row.totalRated < row.totalAssigned
-    if (filter === 'needs_consensus') return row.hasDisagreement && !row.hasConsensus
+    if (filter === 'needs_consensus') return isMajor(row) && !row.hasConsensus
     if (filter === 'mine') {
       if (!session) return false
       return row.raterLabels.some(rl => rl.rater_id === session.id)
@@ -122,10 +142,25 @@ export default function ExplorerPage() {
           <option value="">All rounds</option>
           {rounds.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
         </select>
+        <label
+          className="flex items-center gap-1 text-sm text-gray-500"
+          title="Weighted disagreement score at or above which a post counts as a Disagreement (below it, but above 0, is Minor). Conspiracy label and ideological alignment weigh 1.0; poster typology and template fields 0.1. E.g. L,L,C = 0.33 · L,L,R = 0.67."
+        >
+          Threshold
+          <input
+            type="number"
+            min={0.05}
+            step={0.05}
+            value={threshold}
+            onChange={e => updateThreshold(Number(e.target.value))}
+            className="w-16 border border-gray-300 rounded px-1.5 py-1 text-sm"
+          />
+        </label>
         <div className="flex gap-1 flex-wrap">
           {([
             ['all', 'All'],
             ['disagreement', 'Disagreements'],
+            ['minor', 'Minor'],
             ['incomplete', 'Incomplete'],
             ['needs_consensus', 'Needs consensus'],
             ['mine', 'Mine'],
@@ -169,7 +204,7 @@ export default function ExplorerPage() {
             </thead>
             <tbody>
               {filtered.map(row => {
-                const bg = row.hasDisagreement
+                const bg = isMajor(row)
                   ? 'bg-red-50 hover:bg-red-100'
                   : row.totalRated < row.totalAssigned
                   ? 'bg-amber-50 hover:bg-amber-100'
@@ -188,7 +223,15 @@ export default function ExplorerPage() {
                     }}
                   >
                     <td className="px-4 py-3 text-center">
-                      {row.hasDisagreement && <span title="Disagreement" className="text-red-500 font-bold">!</span>}
+                      {isMajor(row) ? (
+                        <span title={`Disagreement score ${row.disagreementScore}`} className="text-red-500 font-bold whitespace-nowrap">
+                          ! <span className="text-xs font-medium">{row.disagreementScore.toFixed(2)}</span>
+                        </span>
+                      ) : isMinor(row) ? (
+                        <span title={`Minor disagreement score ${row.disagreementScore}`} className="text-orange-500 text-xs font-medium">
+                          {row.disagreementScore.toFixed(2)}
+                        </span>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3">
                       <PlatformBadge platform={row.tweet.platform} />

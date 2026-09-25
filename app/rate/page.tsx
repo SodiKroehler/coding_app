@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { REQUIRED_DIMENSIONS } from '@/lib/dimensions'
 import {
-  DEFAULT_STANCE,
   KNOWN_CONSPIRACY_OTHER,
   TEMPLATE_MAX_WORDS,
   wordCount,
@@ -14,18 +13,7 @@ import type { Tweet, Round } from '@/lib/types'
 import PostCard from '@/components/PostCard'
 import RatingControls, { type RatingExtras } from '@/components/RatingControls'
 import ProgressBar from '@/components/ProgressBar'
-
-function emptyExtras(): RatingExtras {
-  return {
-    stance: DEFAULT_STANCE,
-    actor: '',
-    actorPoliticalLeaning: '',
-    action: '',
-    target: '',
-    knownConspiracy: '',
-    knownConspiracyOther: '',
-  }
-}
+import { emptyExtras } from '@/lib/ratingForm'
 
 export default function RatePage() {
   const router = useRouter()
@@ -137,6 +125,8 @@ export default function RatePage() {
           stance: extras.stance,
           actor: extras.actor.trim() || null,
           actor_political_leaning: extras.actorPoliticalLeaning || null,
+          actor_portrayal: extras.actorPortrayal || null,
+          victim_political_leaning: extras.victimPoliticalLeaning || null,
           action: extras.action.trim() || null,
           target: extras.target.trim() || null,
           known_conspiracy: extras.knownConspiracy || null,

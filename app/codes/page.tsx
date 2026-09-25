@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { CT_LEANING_RULES } from '@/lib/ctLeaning'
 import { DIMENSIONS } from '@/lib/dimensions'
 import {
   ICWSM_EXAMPLES,
@@ -24,6 +25,7 @@ interface CodebookNote {
 const TOC = [
   { href: '#dimensions', label: 'Coding dimensions' },
   { href: '#definitions', label: 'Working definitions' },
+  { href: '#ct-leaning', label: 'CT political leaning (draft)' },
   { href: '#guidelines', label: 'Additional guidelines' },
   { href: '#icwsm-examples', label: 'ICWSM examples' },
   { href: '#pew-extended', label: 'Pew extended definitions' },
@@ -124,7 +126,7 @@ export default function CodesPage() {
                   </blockquote>
                 )}
                 <div className="flex flex-col gap-3">
-                  {dim.options.map((opt) => (
+                  {dim.options.filter((opt) => !opt.hidden).map((opt) => (
                     <div key={opt.value} className="flex items-start gap-3">
                       <span className="inline-block bg-indigo-100 text-indigo-700 rounded px-2 py-0.5 text-xs font-mono font-bold mt-0.5 shrink-0">
                         {opt.value}
@@ -159,6 +161,46 @@ export default function CodesPage() {
               <blockquote className="text-sm text-gray-800 leading-relaxed border-l-2 border-indigo-300 pl-3 italic">
                 “{ICWSM_WORKING_DEFINITIONS.operational}”
               </blockquote>
+            </div>
+          </div>
+        </section>
+
+        <section id="ct-leaning" className="scroll-mt-28">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">CT political leaning (draft)</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Working definition, still being validated against annotated samples and consensus.
+            Rule 1 is the{' '}
+            <a href="#post-polarity" className="text-indigo-600 hover:underline">
+              Post&apos;s Ideological Alignment
+            </a>{' '}
+            label. Rules 2 and 3 are captured in the conspiracy template, and the app computes an
+            actor/victim leaning from them (rule 2 first, then rule 3).
+          </p>
+          <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">{CT_LEANING_RULES.actor.title}</h3>
+              <p className="text-sm text-gray-600 mb-3">{CT_LEANING_RULES.actor.body}</p>
+              <table className="text-sm mb-3">
+                <tbody>
+                  {CT_LEANING_RULES.actor.table.map(([actor, role, result]) => (
+                    <tr key={actor + role}>
+                      <td className="pr-3 py-0.5 text-gray-700">{actor}</td>
+                      <td className="pr-3 py-0.5 text-gray-700">{role}</td>
+                      <td className="py-0.5 font-medium text-gray-900">→ {result}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <ul className="list-disc pl-5 text-sm text-gray-600 flex flex-col gap-1">
+                {CT_LEANING_RULES.actor.examples.map((ex) => <li key={ex}>{ex}</li>)}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">{CT_LEANING_RULES.victim.title}</h3>
+              <p className="text-sm text-gray-600 mb-3">{CT_LEANING_RULES.victim.body}</p>
+              <ul className="list-disc pl-5 text-sm text-gray-600 flex flex-col gap-1">
+                {CT_LEANING_RULES.victim.examples.map((ex) => <li key={ex}>{ex}</li>)}
+              </ul>
             </div>
           </div>
         </section>

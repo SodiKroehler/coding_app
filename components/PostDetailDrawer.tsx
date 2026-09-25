@@ -2,9 +2,12 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import type { ExplorerRaterRating, ExplorerRow } from '@/lib/types'
+import { ctLeaningLabel, deriveCtLeaning } from '@/lib/ctLeaning'
 import { DIMENSIONS, labelForValue } from '@/lib/dimensions'
 import {
   ACTOR_POLITICAL_LEANING_OPTIONS,
+  ACTOR_PORTRAYAL_OPTIONS,
+  VICTIM_POLITICAL_LEANING_OPTIONS,
   KNOWN_CONSPIRACY_OTHER,
   knownConspiracyByLabel,
 } from '@/lib/knownConspiracies'
@@ -49,6 +52,11 @@ function actorLeanLabel(value: string | null) {
   if (!value) return null
   const opt = ACTOR_POLITICAL_LEANING_OPTIONS.find((o) => o.value === value)
   return opt ? `${opt.short} — ${opt.label}` : value
+}
+
+function optionLabel(options: { value: string; label: string }[], value: string | null) {
+  if (!value) return null
+  return options.find((o) => o.value === value)?.label ?? value
 }
 
 function knownConspiracyDisplay(rl: ExplorerRaterRating) {
@@ -117,6 +125,17 @@ function RaterRatingCard({
             <Field label="Stance">{displayOrDash(rating.stance)}</Field>
             <Field label="Actor political leaning">
               {displayOrDash(actorLeanLabel(rating.actor_political_leaning))}
+            </Field>
+            <Field label="Actor portrayed as">
+              {displayOrDash(optionLabel(ACTOR_PORTRAYAL_OPTIONS, rating.actor_portrayal))}
+            </Field>
+            <Field label="Target / victim leaning">
+              {displayOrDash(
+                optionLabel(VICTIM_POLITICAL_LEANING_OPTIONS, rating.victim_political_leaning)
+              )}
+            </Field>
+            <Field label="Actor/victim leaning (computed)">
+              {ctLeaningLabel(deriveCtLeaning(rating))}
             </Field>
           </div>
 

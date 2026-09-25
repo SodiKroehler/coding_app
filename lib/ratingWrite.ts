@@ -1,5 +1,11 @@
 import { DIMENSION_BY_COLUMN, LABEL_COLUMNS } from '@/lib/dimensions'
-import { STANCE_OPTIONS, type ActorPoliticalLeaning, type Stance } from '@/lib/knownConspiracies'
+import {
+  ACTOR_PORTRAYAL_OPTIONS,
+  STANCE_OPTIONS,
+  VICTIM_POLITICAL_LEANING_OPTIONS,
+  type ActorPoliticalLeaning,
+  type Stance,
+} from '@/lib/knownConspiracies'
 
 const ACTOR_LEAN_VALUES: ActorPoliticalLeaning[] = ['left', 'right', 'center', 'unclear']
 
@@ -13,6 +19,8 @@ export type RatingColumnValues = {
   stance: Stance
   actor: string | null
   actor_political_leaning: string | null
+  actor_portrayal: string | null
+  victim_political_leaning: string | null
   action: string | null
   target: string | null
   known_conspiracy: string | null
@@ -48,6 +56,8 @@ export function parseRatingWriteBody(
     stance,
     actor,
     actor_political_leaning,
+    actor_portrayal,
+    victim_political_leaning,
     action,
     target,
     known_conspiracy,
@@ -78,6 +88,16 @@ export function parseRatingWriteBody(
   const actorLean = optText(actor_political_leaning)
   if (actorLean && !ACTOR_LEAN_VALUES.includes(actorLean as ActorPoliticalLeaning)) {
     return { ok: false, error: 'Invalid actor_political_leaning' }
+  }
+
+  const portrayal = optText(actor_portrayal)
+  if (portrayal && !ACTOR_PORTRAYAL_OPTIONS.some((o) => o.value === portrayal)) {
+    return { ok: false, error: 'Invalid actor_portrayal' }
+  }
+
+  const victimLean = optText(victim_political_leaning)
+  if (victimLean && !VICTIM_POLITICAL_LEANING_OPTIONS.some((o) => o.value === victimLean)) {
+    return { ok: false, error: 'Invalid victim_political_leaning' }
   }
 
   const labelRecord = labels as Record<string, unknown>
@@ -115,6 +135,8 @@ export function parseRatingWriteBody(
         stance: resolvedStance,
         actor: optText(actor),
         actor_political_leaning: actorLean,
+        actor_portrayal: portrayal,
+        victim_political_leaning: victimLean,
         action: optText(action),
         target: optText(target),
         known_conspiracy: optText(known_conspiracy),

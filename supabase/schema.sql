@@ -87,6 +87,8 @@ CREATE TABLE ratings (
   stance                  TEXT NOT NULL DEFAULT 'NEUTRAL',
   actor                   TEXT,
   actor_political_leaning TEXT CHECK (actor_political_leaning IN ('left','right','center','unclear')),
+  actor_portrayal         TEXT CHECK (actor_portrayal IN ('good','bad','unclear')),
+  victim_political_leaning TEXT CHECK (victim_political_leaning IN ('left','right','unclear')),
   action                  TEXT,
   target                  TEXT,
   known_conspiracy        TEXT,

@@ -124,6 +124,27 @@ export const ACTOR_POLITICAL_LEANING_OPTIONS: {
   { value: 'unclear', short: 'U', label: 'Unclear' },
 ]
 
+/** Proxy 2: how the conspiring actor is portrayed. */
+export type ActorPortrayal = 'good' | 'bad' | 'unclear'
+
+export const ACTOR_PORTRAYAL_OPTIONS: { value: ActorPortrayal; label: string }[] = [
+  { value: 'good', label: 'Good' },
+  { value: 'bad', label: 'Bad' },
+  { value: 'unclear', label: 'Unclear' },
+]
+
+/** Proxy 3: political leaning of the conspiracy's target / victim. */
+export type VictimPoliticalLeaning = 'left' | 'right' | 'unclear'
+
+export const VICTIM_POLITICAL_LEANING_OPTIONS: {
+  value: VictimPoliticalLeaning
+  label: string
+}[] = [
+  { value: 'left', label: 'Left' },
+  { value: 'right', label: 'Right' },
+  { value: 'unclear', label: 'Unclear / non-partisan' },
+]
+
 /** Soft max words for actor / action / target free-text slots. */
 export const TEMPLATE_MAX_WORDS = 100
 
