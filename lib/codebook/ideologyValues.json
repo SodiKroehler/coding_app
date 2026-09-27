@@ -1,0 +1,503 @@
+{
+  "generated": "2026-09-27",
+  "values": [
+    {
+      "id": "V1",
+      "heading": "Supports mass deportation",
+      "description": "Post endorses mass deportation, detention or suspending asylum, or frames immigration as an 'invasion' or deliberate population replacement.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": "2017-01", "note": "The right was split on immigration: in 2014, 73% of Steadfast Conservatives vs. 21% of Business Conservatives saw immigrants as a burden." },
+        { "signal": "STRONG_RIGHT", "from": "2017-01", "to": null, "note": "Partisan gaps widened sharply from 2017. In 2024, 88% of Trump supporters vs. 27% of Harris supporters favored mass deportation. In 2026 support was 0–15% across left groups and 27–81% across right groups." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Key Facts from the 2014 Political Typology", "url": "https://www.pewresearch.org/politics/2014/06/26/key-facts-from-pew-researchs-political-typology/" },
+        { "label": "Pew Research Center — The Partisan Divide on Political Values Grows Even Wider (2017)", "url": "https://www.pewresearch.org/politics/2017/10/05/the-partisan-divide-on-political-values-grows-even-wider/" },
+        { "label": "Pew Research Center — Where Trump and Harris Supporters Differ and Align on Immigration (2024)", "url": "https://www.pewresearch.org/race-and-ethnicity/2024/09/27/trump-and-harris-supporters-differ-on-mass-deportations-but-favor-border-security-high-skilled-immigration/" },
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V2",
+      "heading": "Opposes immigration enforcement",
+      "description": "Post supports a path to legal status for undocumented immigrants, or criticises ICE raids, deportations or detention as cruel or illegitimate.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": null, "note": "Left groups hold this view almost uniformly, but about two-thirds of the Pragmatic and Polite Right also back a path to legal status, so the view crosses sides." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Pragmatic and Polite Right (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/pragmatic-and-polite-right/" },
+        { "label": "Pew Research Center — Where Trump and Harris Supporters Differ and Align on Immigration (2024)", "url": "https://www.pewresearch.org/race-and-ethnicity/2024/09/27/trump-and-harris-supporters-differ-on-mass-deportations-but-favor-border-security-high-skilled-immigration/" }
+      ]
+    },
+    {
+      "id": "V3",
+      "heading": "Prioritizes border security",
+      "description": "Post calls for securing the border or stopping illegal crossings without endorsing mass deportation or 'invasion' framing.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": null, "note": "Use only as a tiebreaker. In 2026, 74% of the Order and Opportunity Left vs. 84% of the Pragmatic and Polite Right rated border security very important, so the moderate groups on each side barely differ." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Issues and the 2024 Election", "url": "https://www.pewresearch.org/politics/2024/09/09/issues-and-the-2024-election/" }
+      ]
+    },
+    {
+      "id": "V4",
+      "heading": "Affirms transgender identity",
+      "description": "Post affirms that gender can differ from sex at birth, supports trans people's rights or care, or frames anti-trans laws as persecution.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": "2017-01", "note": "The issue had low salience and there are no typology items for this period. The direction was the same, but treat it as emerging." },
+        { "signal": "STRONG_LEFT", "from": "2017-01", "to": null, "note": "In 2026, at most 16% of any right group said gender can differ from sex at birth. The start date for the stronger signal is approximate." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Cultural Issues and the 2024 Election", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2024/06/PP_2024.6.5_cultural-values_REPORT.pdf" }
+      ]
+    },
+    {
+      "id": "V5",
+      "heading": "Opposes 'gender ideology'",
+      "description": "Post frames trans rights or 'gender ideology' as a plot, a grooming campaign or a threat to children or society.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": "2017-01", "note": "The issue had low salience and was rarely discussed." },
+        { "signal": "STRONG_RIGHT", "from": "2017-01", "to": null, "note": "This tier is inferred from the survey item pattern (hostile framing sits far beyond the plain 'sex is fixed' view). It was not measured directly." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Cultural Issues and the 2024 Election", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2024/06/PP_2024.6.5_cultural-values_REPORT.pdf" }
+      ]
+    },
+    {
+      "id": "V6",
+      "heading": "Sex fixed at birth",
+      "description": "Post states plainly that sex at birth determines gender, with no hostile or conspiratorial framing.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": null, "note": "In 2026 this was a majority view in the Order and Opportunity Left (71%) and the Left-Out Left (53%), so it only works as a tiebreaker." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Order and Opportunity Left (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/order-and-opportunity-left/" },
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V7",
+      "heading": "Views on same-sex marriage",
+      "description": "Post supports or opposes same-sex marriage.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Key Facts from the 2014 Political Typology", "url": "https://www.pewresearch.org/politics/2014/06/26/key-facts-from-pew-researchs-political-typology/" },
+        { "label": "Pew Research Center — Order and Opportunity Left (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/order-and-opportunity-left/" }
+      ]
+    },
+    {
+      "id": "V8",
+      "heading": "Opposes legal abortion",
+      "description": "Post calls abortion murder, supports bans or restrictions, or frames abortion providers such as Planned Parenthood as sinister.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_RIGHT", "from": "2014-01", "to": null, "note": "The direction was stable across all periods. In 2026, 2–27% of left groups vs. 43–83% of right groups said abortion should be illegal in all or most cases." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Issues and the 2024 Election", "url": "https://www.pewresearch.org/politics/2024/09/09/issues-and-the-2024-election/" }
+      ]
+    },
+    {
+      "id": "V9",
+      "heading": "Supports abortion access",
+      "description": "Post supports legal abortion access or criticises bans, restrictions or pro-life groups.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": null, "note": "Pro-choice views are a majority in the Pragmatic and Polite Right (about 54%) and the Unconventional Right (about 57%). Salience rose among Democrats after the 2022 Dobbs decision, but the crossover remains." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Cultural Issues and the 2024 Election", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2024/06/PP_2024.6.5_cultural-values_REPORT.pdf" }
+      ]
+    },
+    {
+      "id": "V10",
+      "heading": "Defends gun rights",
+      "description": "Post says gun ownership makes people safer, opposes gun restrictions, or frames gun control or shootings as a pretext for confiscation.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_RIGHT", "from": "2014-01", "to": null, "note": "The gap was stable and among the widest in 2024. In 2026, comfort with open carry was 2–19% across left groups." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Issues and the 2024 Election", "url": "https://www.pewresearch.org/politics/2024/09/09/issues-and-the-2024-election/" },
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V11",
+      "heading": "Supports gun control",
+      "description": "Post calls gun violence a major problem or supports stricter gun laws.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": null, "note": "In 2026, 57% of the Pragmatic and Polite Right called gun violence a very big problem, so concern about gun violence crosses sides." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Pragmatic and Polite Right (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/pragmatic-and-polite-right/" }
+      ]
+    },
+    {
+      "id": "V12",
+      "heading": "Wants Christian national culture",
+      "description": "Post says America should be grounded in Christian belief, or that God and Christianity are being deliberately purged from public life.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_RIGHT", "from": "2014-01", "to": null, "note": "In 2026, 1–29% of left groups vs. 31–82% of right groups called a Christian-based culture very important. The view is concentrated in the Faith First Conservatives and No Apologies Right." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Political Typology (2021)", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2021/11/PP_2021.11.09_political-typology_REPORT.pdf" }
+      ]
+    },
+    {
+      "id": "V13",
+      "heading": "Wants secular public life",
+      "description": "Post supports separating church and state or criticises religious influence on policy.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": null, "note": "Most of the Pragmatic and Polite Right and Unconventional Right also do not prioritize a Christian culture." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V14",
+      "heading": "Sees systemic racism",
+      "description": "Post says slavery, discrimination or a system rigged by design keeps Black Americans or other minorities down.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": "2017-01", "note": "The partisan gap was smaller before 2017 (19 points in 2009)." },
+        { "signal": "STRONG_LEFT", "from": "2017-01", "to": null, "note": "The partisan gap reached 50 points in 2017. Clear majorities of the Pragmatic and Polite Right still say the legacy of slavery affects Black Americans, so the view is not absent on the right." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — The Partisan Divide on Political Values Grows Even Wider (2017)", "url": "https://www.pewresearch.org/politics/2017/10/05/the-partisan-divide-on-political-values-grows-even-wider/" },
+        { "label": "Pew Research Center — Pragmatic and Polite Right (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/pragmatic-and-polite-right/" }
+      ]
+    },
+    {
+      "id": "V15",
+      "heading": "Alleges anti-white discrimination",
+      "description": "Post claims white people face systematic discrimination, or frames DEI and diversity efforts as a plot against white people.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": "2017-01", "note": "The racial divide was less polarized before 2017." },
+        { "signal": "STRONG_RIGHT", "from": "2017-01", "to": null, "note": "In 2021, Faith and Flag Conservatives were more likely to see discrimination against White people than against Black people. The view is concentrated in the right's anchor groups." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Political Typology (2021)", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2021/11/PP_2021.11.09_political-typology_REPORT.pdf" },
+        { "label": "Pew Research Center — The Partisan Divide on Political Values Grows Even Wider (2017)", "url": "https://www.pewresearch.org/politics/2017/10/05/the-partisan-divide-on-political-values-grows-even-wider/" }
+      ]
+    },
+    {
+      "id": "V16",
+      "heading": "Supports broad police powers",
+      "description": "Post defends police authority, supports aggressive stop-and-search, or frames criticism of police as dangerous.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": null, "note": "In 2026, 42% of the Order and Opportunity Left vs. 57% of the Pragmatic and Polite Right backed broad stop powers, so the moderate groups separate only weakly. The signal is strong only at the anchor groups." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Order and Opportunity Left (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/order-and-opportunity-left/" }
+      ]
+    },
+    {
+      "id": "V17",
+      "heading": "Sees police as oppressive",
+      "description": "Post calls for defunding or abolishing police, or frames police as a tool of oppression serving the powerful.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_LEFT", "from": "2014-01", "to": null, "note": "The view is concentrated among Leftward Progressives (29% confidence in police). No earlier subgroup trend was found, but the direction appears stable." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Leftward Progressives (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/leftward-progressives/" }
+      ]
+    },
+    {
+      "id": "V18",
+      "heading": "Crime is out of control",
+      "description": "Post says violent crime is rampant or a major national problem, without a policy prescription.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V19",
+      "heading": "Expands the safety net",
+      "description": "Post supports more government services, universal healthcare, or expanded Social Security or aid, or frames private interests as blocking them.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_LEFT", "from": "2014-01", "to": null, "note": "This is one of the few values that separates the Order and Opportunity Left from the Pragmatic and Polite Right. Democrats' support for government help for the needy rose from 54% to 71% between 2011 and 2017. The Unconventional Right is more moderate on this." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Fairness of the Economic System and the Social Safety Net (2014)", "url": "https://www.pewresearch.org/politics/2014/06/26/section-3-fairness-of-the-economic-system-views-of-the-poor-and-the-social-safety-net/" },
+        { "label": "Pew Research Center — The Partisan Divide on Political Values Grows Even Wider (2017)", "url": "https://www.pewresearch.org/politics/2017/10/05/the-partisan-divide-on-political-values-grows-even-wider/" },
+        { "label": "Pew Research Center — Order and Opportunity Left (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/order-and-opportunity-left/" }
+      ]
+    },
+    {
+      "id": "V20",
+      "heading": "Favors smaller government",
+      "description": "Post argues for smaller government, says welfare breeds dependency, or frames aid programs as a scheme to buy votes.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_RIGHT", "from": "2014-01", "to": null, "note": "Pew (2026) says economic conservatism unites the right-leaning groups. In 2014, conservative groups and the right-leaning Young Outsiders alike said aid does more harm than good (86% each)." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Fairness of the Economic System and the Social Safety Net (2014)", "url": "https://www.pewresearch.org/politics/2014/06/26/section-3-fairness-of-the-economic-system-views-of-the-poor-and-the-social-safety-net/" },
+        { "label": "Pew Research Center — Pragmatic and Polite Right (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/pragmatic-and-polite-right/" }
+      ]
+    },
+    {
+      "id": "V21",
+      "heading": "Tax the rich",
+      "description": "Post supports raising taxes on corporations or the wealthy.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": null, "note": "In 2026, 62% of the Pragmatic and Polite Right and 51% of the Unconventional Right supported raising corporate taxes, so the view crosses sides." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V22",
+      "heading": "Anti-billionaire or socialist",
+      "description": "Post endorses democratic socialism, or frames billionaires and capitalism itself as harmful to the country.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_LEFT", "from": "2014-01", "to": null, "note": "In 2026, 11–66% of left groups vs. at most 4% of any right group liked democratic-socialist leaders. Subgroup data exist only for 2026." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "Pew Research Center — Leftward Progressives (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/leftward-progressives/" }
+      ]
+    },
+    {
+      "id": "V23",
+      "heading": "Generic anti-corporate anger",
+      "description": "Post says corporations, Wall Street or 'Big Pharma' profit too much or rig the system, without tying it to a policy value.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" },
+        { "label": "YouGov — Belief in Conspiracies Largely Depends on Political Identity (2016)", "url": "https://today.yougov.com/politics/articles/17286-belief-conspiracies-largely-depends-political-iden" }
+      ]
+    },
+    {
+      "id": "V24",
+      "heading": "Favors tariffs and protectionism",
+      "description": "Post supports tariffs, or says free-trade deals have hurt America.",
+      "indicator": true,
+      "periods": [
+        { "signal": "NONE", "from": "2014-01", "to": "2016-01", "note": "No reliable signal before 2016: in 2014, trade skepticism split the right internally and a majority of Republicans still favored free-trade deals. NONE is used here because a real period with no signal is different from a non-indicator." },
+        { "signal": "WEAK_RIGHT", "from": "2016-01", "to": null, "note": "The shift was driven by a person (Trump). Republicans calling free-trade deals good fell from 56% to 29% between 2015 and 2016. Populist-left anti-trade rhetoric also exists, so use this only as a tiebreaker." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Support for Free Trade Agreements Rebounds (2017)", "url": "https://www.pewresearch.org/short-reads/2017/04/25/support-for-free-trade-agreements-rebounds-modestly-but-wide-partisan-differences-remain/" },
+        { "label": "Pew Research Center — Americans More Critical of Tariff Increases (2018)", "url": "https://www.pewresearch.org/short-reads/2018/05/10/americans-are-generally-positive-about-free-trade-agreements-more-critical-of-tariff-increases/" },
+        { "label": "Pew Research Center — Majority Take a Dim View of Increased Trade (2024)", "url": "https://www.pewresearch.org/short-reads/2024/07/29/majority-of-americans-take-a-dim-view-of-increased-trade-with-other-countries/" }
+      ]
+    },
+    {
+      "id": "V25",
+      "heading": "Climate change is urgent",
+      "description": "Post treats human-caused climate change as a serious threat, supports environmental regulation, or frames fossil-fuel interests as suppressing the truth.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": "2017-01", "note": "There was crossover: in 2014, 68% of the right-leaning Young Outsiders said stricter environmental laws were worth the cost." },
+        { "signal": "STRONG_LEFT", "from": "2017-01", "to": null, "note": "Pew's 2017 report lists the environment among its record partisan gaps. No 2026 subgroup data were retrieved." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Key Facts from the 2014 Political Typology", "url": "https://www.pewresearch.org/politics/2014/06/26/key-facts-from-pew-researchs-political-typology/" },
+        { "label": "Pew Research Center — The Partisan Divide on Political Values Grows Even Wider (2017)", "url": "https://www.pewresearch.org/politics/2017/10/05/the-partisan-divide-on-political-values-grows-even-wider/" }
+      ]
+    },
+    {
+      "id": "V26",
+      "heading": "Climate change is a hoax",
+      "description": "Post calls climate change a hoax or scam, or says climate policy is a plot for control.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_RIGHT", "from": "2014-01", "to": null, "note": "The baseline comes from before 2014: in 2013, 58% of Republicans vs. 24% of Democrats called global warming a hoax. The direction was stable, but a minority of the left holds this view." }
+      ],
+      "sources": [
+        { "label": "NBC News — Conspiracy Beliefs Fall Along Party Lines (PPP poll, 2013)", "url": "https://www.nbcnews.com/news/amp/wbna51429613" },
+        { "label": "Pew Research Center — Issues and the 2024 Election", "url": "https://www.pewresearch.org/politics/2024/09/09/issues-and-the-2024-election/" }
+      ]
+    },
+    {
+      "id": "V27",
+      "heading": "Russia and Ukraine views",
+      "description": "Post calls Russia an enemy, or supports or opposes aid to Ukraine.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Republican Opinion Shifts on Russia-Ukraine War (2025)", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2025/04/pg_2025.04.17_us-russia-nato_report.pdf" },
+        { "label": "Pew Research Center — Pragmatic and Polite Right (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/pragmatic-and-polite-right/" }
+      ]
+    },
+    {
+      "id": "V28",
+      "heading": "Opposes vaccine mandates",
+      "description": "Post opposes vaccine requirements or public-health mandates, or claims vaccines are harmful, a bioweapon or a depopulation tool.",
+      "indicator": true,
+      "periods": [
+        { "signal": "NONE", "from": "2014-01", "to": "2020-03", "note": "No partisan signal before 2020: belief that vaccines cause autism showed no party gap in December 2016." },
+        { "signal": "STRONG_RIGHT", "from": "2020-03", "to": null, "note": "Republican support for school MMR requirements fell from 79% to 52% between 2019 and 2025, while Democrats held at 86%. A cross-partisan anti-vaccine minority persists." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Childhood Vaccines (Nov 2025)", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2025/11/PS_2025.11.18_childhood-vaccines_report.pdf" },
+        { "label": "YouGov — Belief in Conspiracies Largely Depends on Political Identity (2016)", "url": "https://today.yougov.com/politics/articles/17286-belief-conspiracies-largely-depends-political-iden" },
+        { "label": "Yahoo News/YouGov — Coronavirus Conspiracy Theories Spreading on the Right (2020)", "url": "https://www.yahoo.com/news/new-yahoo-news-you-gov-poll-shows-coronavirus-conspiracy-theories-spreading-on-the-right-may-hamper-vaccine-efforts-152843610.html" }
+      ]
+    },
+    {
+      "id": "V29",
+      "heading": "Distrusts scientists and experts",
+      "description": "Post claims scientists or experts are corrupt, paid to lie, or should not be trusted.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": "2020-03", "note": "The gap was small before the pandemic: confidence in scientists was 91% among Democrats vs. 82% among Republicans in January 2019." },
+        { "signal": "STRONG_RIGHT", "from": "2020-03", "to": null, "note": "Republican confidence fell 22 points between 2020 and 2021. The gap (Democrats 90% vs. Republicans 65% in January 2026) persisted under Trump's second term, so it reflects the pandemic, not who holds power." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Trust in Science (Jan 2026)", "url": "https://www.pewresearch.org/wp-content/uploads/sites/20/2026/01/PS_2026.1.15-trust-in-science_report.pdf" }
+      ]
+    },
+    {
+      "id": "V30",
+      "heading": "Trusts public health agencies",
+      "description": "Post expresses trust or distrust in the CDC or public health officials as institutions.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Issues in Science and Technology — Trust in Science: Why It's Declining and Becoming Politicized", "url": "https://issues.org/new-politics-science-mills-st-clair/" },
+        { "label": "Pew Research Center — Views of Justice Department and FBI (2025)", "url": "https://www.pewresearch.org/politics/2025/08/27/republicans-views-of-justice-department-fbi-rebound-as-democrats-views-shift-more-negative/" }
+      ]
+    },
+    {
+      "id": "V31",
+      "heading": "COVID came from a lab",
+      "description": "Post claims COVID-19 originated in a lab, without claiming it was engineered or released on purpose.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "YouGov — Two-Thirds of Americans Believe COVID Originated from a Lab (2023)", "url": "https://today.yougov.com/topics/politics/articles-reports/2023/03/10/americans-believe-covid-origin-lab" }
+      ]
+    },
+    {
+      "id": "V32",
+      "heading": "Expands voting access",
+      "description": "Post supports automatic registration, mail voting or easier ballot access, or frames voting restrictions as deliberate voter suppression.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_LEFT", "from": "2014-01", "to": null, "note": "Evidence is thin and exists at the subgroup level only for 2026. The Order and Opportunity Left favor automatic registration (65%) and no-excuse mail voting (70%) more than right groups do." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Order and Opportunity Left (2026 Typology)", "url": "https://www.pewresearch.org/politics/2026/06/10/order-and-opportunity-left/" }
+      ]
+    },
+    {
+      "id": "V33",
+      "heading": "Demands voter ID",
+      "description": "Post supports voter ID or anti-fraud rules, or claims noncitizens are voting.",
+      "indicator": true,
+      "periods": [
+        { "signal": "WEAK_RIGHT", "from": "2014-01", "to": null, "note": "Photo ID has majority support in most groups on both sides (46–84% on the left), so use this only as a tiebreaker. Claims about noncitizens voting lean further right." }
+      ],
+      "sources": [
+        { "label": "Pew Research Center — Beyond Red vs. Blue: The Political Typology (2026)", "url": "https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/" }
+      ]
+    },
+    {
+      "id": "V34",
+      "heading": "Claims election was stolen",
+      "description": "Post claims a presidential election was stolen or rigged, or that vote counts were altered.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "YouGov — Belief in Conspiracies Largely Depends on Political Identity (2016)", "url": "https://today.yougov.com/politics/articles/17286-belief-conspiracies-largely-depends-political-iden" },
+        { "label": "CNN — Republicans Who Think Biden's 2020 Win Was Illegitimate (2023)", "url": "https://www.cnn.com/2023/08/03/politics/cnn-poll-republicans-think-2020-election-illegitimate/index.html" },
+        { "label": "Enders et al. (2023), Political Behavior", "url": "https://link.springer.com/article/10.1007/s11109-022-09812-3" }
+      ]
+    },
+    {
+      "id": "V35",
+      "heading": "Media has liberal bias",
+      "description": "Post says mainstream media lies to protect Democrats or the left, or is a partisan enemy of conservatives.",
+      "indicator": true,
+      "periods": [
+        { "signal": "STRONG_RIGHT", "from": "2014-01", "to": null, "note": "Stable regardless of who held the White House. Republican trust in media has not exceeded 21% since 2015 and was 8% in 2025." }
+      ],
+      "sources": [
+        { "label": "Gallup — Trust in Media at New Low of 28% in U.S. (2025)", "url": "https://news.gallup.com/poll/695762/trust-media-new-low.aspx" }
+      ]
+    },
+    {
+      "id": "V36",
+      "heading": "Generic media distrust",
+      "description": "Post says mainstream media is controlled, owned by elites or lies, with no partisan direction.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Gallup — Trust in Media at New Low of 28% in U.S. (2025)", "url": "https://news.gallup.com/poll/695762/trust-media-new-low.aspx" }
+      ]
+    },
+    {
+      "id": "V37",
+      "heading": "Trusts FBI and DOJ",
+      "description": "Post expresses trust or distrust in the FBI, DOJ or intelligence agencies, or calls them politically weaponized.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Growing Partisan Differences in Views of the FBI (2018)", "url": "https://www.pewresearch.org/politics/2018/07/24/growing-partisan-differences-in-views-of-the-fbi-stark-divide-over-ice/" },
+        { "label": "Pew Research Center — Views of Justice Department and FBI (2025)", "url": "https://www.pewresearch.org/politics/2025/08/27/republicans-views-of-justice-department-fbi-rebound-as-democrats-views-shift-more-negative/" }
+      ]
+    },
+    {
+      "id": "V38",
+      "heading": "Trusts DHS and ICE",
+      "description": "Post expresses trust or distrust in DHS or ICE as institutions, apart from any position on immigration policy.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Views of Justice Department and FBI (2025)", "url": "https://www.pewresearch.org/politics/2025/08/27/republicans-views-of-justice-department-fbi-rebound-as-democrats-views-shift-more-negative/" }
+      ]
+    },
+    {
+      "id": "V39",
+      "heading": "Economic optimism or pessimism",
+      "description": "Post says the economy is doing well or badly.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Most Americans Rate US Economy Negatively (Oct 2025)", "url": "https://www.pewresearch.org/short-reads/2025/10/03/most-americans-continue-to-rate-the-us-economy-negatively-as-partisan-gap-widens/" },
+        { "label": "Gallup — U.S. Economic Confidence Ticks Down as Partisans' Views Shift (2025)", "url": "https://news.gallup.com/poll/655859/economic-confidence-ticks-down-partisans-views-shift.aspx" }
+      ]
+    },
+    {
+      "id": "V40",
+      "heading": "Views on executive power",
+      "description": "Post supports or opposes broad presidential or executive authority.",
+      "indicator": false,
+      "periods": [],
+      "sources": [
+        { "label": "Pew Research Center — Views of Justice Department and FBI (2025)", "url": "https://www.pewresearch.org/politics/2025/08/27/republicans-views-of-justice-department-fbi-rebound-as-democrats-views-shift-more-negative/" }
+      ]
+    }
+  ]
+}

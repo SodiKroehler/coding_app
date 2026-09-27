@@ -11,6 +11,12 @@ import {
   exampleById,
 } from '@/lib/codebook/icwsm24'
 import { PEW_TYPOLOGY_EXTENDED, PEW_TYPOLOGY_SOURCE } from '@/lib/pewTypology'
+import {
+  IDEOLOGY_VALUES,
+  IDEOLOGY_VALUES_GENERATED,
+  SIGNAL_CLASS,
+  formatPeriod,
+} from '@/lib/ideologyValues'
 import { KNOWN_CONSPIRACIES } from '@/lib/knownConspiracies'
 import type { CodebookExample } from '@/lib/types'
 import PlatformBadge from '@/components/PlatformBadge'
@@ -26,6 +32,7 @@ const TOC = [
   { href: '#dimensions', label: 'Coding dimensions' },
   { href: '#definitions', label: 'Working definitions' },
   { href: '#ct-leaning', label: 'CT political leaning (draft)' },
+  { href: '#ideology-values', label: 'Ideology values (proxy 1)' },
   { href: '#guidelines', label: 'Additional guidelines' },
   { href: '#icwsm-examples', label: 'ICWSM examples' },
   { href: '#pew-extended', label: 'Pew extended definitions' },
@@ -202,6 +209,94 @@ export default function CodesPage() {
                 {CT_LEANING_RULES.victim.examples.map((ex) => <li key={ex}>{ex}</li>)}
               </ul>
             </div>
+          </div>
+        </section>
+
+        <section id="ideology-values" className="scroll-mt-28">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Ideology values (proxy 1){' '}
+            <span className="align-middle text-xs font-semibold uppercase tracking-wide bg-amber-100 text-amber-800 rounded px-2 py-0.5">
+              Draft — not yet reviewed
+            </span>
+          </h2>
+          <p className="text-sm text-gray-600 mb-2">
+            Reference list for{' '}
+            <a href="#post-polarity" className="text-indigo-600 hover:underline">
+              Post&apos;s Ideological Alignment
+            </a>
+            . Find the value(s) a post expresses, then read the signal for the period the post was
+            made (or the period the CT refers to). Cite IDs in your notes, e.g.{' '}
+            <code className="text-xs bg-gray-100 rounded px-1">V8 strong right</code>, so consensus
+            meetings can check against the sources.
+          </p>
+          <p className="text-xs text-gray-500 mb-6">
+            Periods start in 2014; for earlier posts use the earliest period with caution. Generated{' '}
+            {IDEOLOGY_VALUES_GENERATED} from deep research (mostly Pew Research Center).
+          </p>
+          <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                <tr>
+                  <th className="px-3 py-2 w-12">ID</th>
+                  <th className="px-3 py-2 w-40">Value</th>
+                  <th className="px-3 py-2">Description</th>
+                  <th className="px-3 py-2 w-64">Signal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {IDEOLOGY_VALUES.map((v) => (
+                  <tr key={v.id} id={v.id} className="scroll-mt-28 align-top target:bg-indigo-50">
+                    <td className="px-3 py-3 font-mono text-xs font-semibold text-gray-700">
+                      <a href={`#${v.id}`} className="hover:underline">
+                        {v.id}
+                      </a>
+                    </td>
+                    <td className="px-3 py-3 font-semibold text-gray-900">{v.heading}</td>
+                    <td className="px-3 py-3 text-gray-700 leading-relaxed">
+                      {v.description}
+                      <span className="block mt-1 text-xs text-gray-500">
+                        Sources:{' '}
+                        {v.sources.map((s, i) => (
+                          <a
+                            key={s.url}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={s.label}
+                            className="text-indigo-600 hover:underline mr-1"
+                          >
+                            [{i + 1}]
+                          </a>
+                        ))}
+                      </span>
+                    </td>
+                    <td className="p-0">
+                      {v.indicator ? (
+                        <div className="divide-y divide-gray-200">
+                          {v.periods.map((p) => (
+                            <div key={p.from} className="px-3 py-2">
+                              <span
+                                className={`inline-block rounded px-1.5 py-0.5 text-xs font-bold ${SIGNAL_CLASS[p.signal]}`}
+                              >
+                                {p.signal}
+                              </span>{' '}
+                              <span className="text-xs text-gray-600">{formatPeriod(p)}</span>
+                              {p.note && (
+                                <p className="text-xs text-gray-500 leading-snug mt-1">{p.note}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="px-3 py-2 text-xs italic text-gray-500">
+                          Cannot be used as an indicator
+                        </p>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 

@@ -27,6 +27,8 @@ export interface Dimension {
   infoIntro: string
   infoQuote?: string
   infoLink?: DimensionInfoLink
+  /** Codebook reference table shown prominently in the info popup (opens in a new tab) */
+  referenceLink?: DimensionInfoLink
   /** How much a split on this field counts toward the Explorer disagreement score */
   disagreementWeight: number
   /** Distance between two different values in [0, 1]; defaults to 1 */
@@ -107,6 +109,10 @@ export const DIMENSIONS: Dimension[] = [
     infoLink: {
       href: 'https://www.pewresearch.org/politics/2026/06/10/beyond-red-vs-blue-the-political-typology/',
       label: 'Beyond Red vs Blue: The Political Typology (Pew, June 2026)',
+    },
+    referenceLink: {
+      href: '/codes#ideology-values',
+      label: 'Ideology values table (V1–V40) — which values signal left/right, and when',
     },
     options: [
       {

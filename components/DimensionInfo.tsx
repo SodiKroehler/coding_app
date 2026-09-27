@@ -73,6 +73,17 @@ export default function DimensionInfo({ dimension }: Props) {
               </p>
             )}
 
+            {dimension.referenceLink && (
+              <a
+                href={dimension.referenceLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg px-3 py-2 mb-4"
+              >
+                {dimension.referenceLink.label} ↗
+              </a>
+            )}
+
             {dimension.infoQuote && (
               <blockquote className="text-sm text-gray-800 leading-relaxed border-l-2 border-indigo-300 pl-3 mb-4 italic">
                 “{dimension.infoQuote}”
