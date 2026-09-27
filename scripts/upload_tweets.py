@@ -40,6 +40,9 @@ CODING_ROUNDS_DIR = SCRIPT_DIR
 
 ALLOWED_PLATFORMS = {"twitter", "bluesky", "reddit", "youtube", "tiktok"}
 
+# Gold-label pseudo-rater (see supabase/migrations/seed_consensus_rater.sql) — never assign posts to it
+CONSENSUS_EMAIL = "consensus@internal.invalid"
+
 # Optional extras kept in tweets.metadata (not first-class columns)
 METADATA_KEYS = (
     "subreddit",
@@ -92,13 +95,16 @@ def get_or_create_round(name: str) -> str:
 
 
 def get_all_raters() -> list[dict]:
-    res = supabase.table("raters").select("id, name, email").execute()
+    res = supabase.table("raters").select("id, name, email").neq("email", CONSENSUS_EMAIL).execute()
     return res.data or []
 
 
 def get_raters_by_email(emails: list[str]) -> list[dict]:
     raters = []
     for email in emails:
+        if email.strip().lower() == CONSENSUS_EMAIL:
+            print("  WARNING: CONSENSUS is not a real rater — skipping.", file=sys.stderr)
+            continue
         res = (
             supabase.table("raters")
             .select("id, name, email")

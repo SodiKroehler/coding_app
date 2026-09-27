@@ -75,32 +75,44 @@ def ct_leaning(r: dict) -> str:
 
 def main(round_name: str | None, out_path: str | None):
     # Fetch all ratings, joined with tweets, raters, rounds
-    label_select = ", ".join(f"ratings.{col}" for col in LABEL_COLUMNS)
-    extra_select = ", ".join(f"ratings.{col}" for col in EXTRA_COLUMNS)
-    query = (
-        supabase.table("ratings")
-        .select(
-            f"id, tweet_id, rater_id, round_id, {label_select}, {extra_select}, created_at, "
-            "tweets(id, platform, content, author, posted_at), "
-            "raters(id, name, email), "
-            "rounds(id, name, description)"
-        )
-        .order("created_at")
-    )
-
+    round_id = None
     if round_name:
         # Need to join via round_id matching rounds.name — fetch round id first
-        res = supabase.table("rounds").select("id").eq("name", round_name).single().execute()
-        if not res.data:
+        res = supabase.table("rounds").select("id").eq("name", round_name).maybe_single().execute()
+        if res is None or not res.data:
             print(f"Round '{round_name}' not found.", file=sys.stderr)
             sys.exit(1)
-        query = query.eq("round_id", res.data["id"])
+        round_id = res.data["id"]
 
-    result = query.execute()
-    ratings = result.data or []
+    # All rating columns (*) so schema changes don't break the export.
+    # PostgREST caps each response (default 1000 rows), so page through.
+    ratings = []
+    page_size = 1000
+    while True:
+        query = (
+            supabase.table("ratings")
+            .select(
+                "*, "
+                "tweets(id, platform, content, author, posted_at), "
+                "raters(id, name, email), "
+                "rounds(id, name, description)"
+            )
+            .order("created_at")
+            .order("id")
+        )
+        if round_id:
+            query = query.eq("round_id", round_id)
+        page = query.range(len(ratings), len(ratings) + page_size - 1).execute().data or []
+        ratings.extend(page)
+        if len(page) < page_size:
+            break
+
+    # Rating columns not yet listed above go at the end
+    known = set(FIELDNAMES) | {"id", "created_at", "rater_id", "round_id", "tweets", "raters", "rounds"}
+    new_cols = sorted({k for r in ratings for k in r} - known)
 
     out = open(out_path, "w", newline="", encoding="utf-8") if out_path else sys.stdout
-    writer = csv.DictWriter(out, fieldnames=FIELDNAMES)
+    writer = csv.DictWriter(out, fieldnames=[*FIELDNAMES, *new_cols])
     writer.writeheader()
 
     for r in ratings:
@@ -124,6 +136,8 @@ def main(round_name: str | None, out_path: str | None):
             row[col] = r.get(col, "")
         for col in EXTRA_COLUMNS:
             row[col] = r.get(col) or ""
+        for col in new_cols:
+            row[col] = r.get(col)
         row["ct_leaning_actor_victim"] = ct_leaning(r)
         writer.writerow(row)
 
